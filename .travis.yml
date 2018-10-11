@@ -1,0 +1,24 @@
+sudo: required
+language: python
+python:
+- '3.6'
+services:
+- docker
+addons:
+  apt:
+    packages:
+    - docker-ce
+install:
+  - pip install -q requests docker
+before_script:
+- echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
+script:
+- python build.py
+- docker build -t $DOCKER_USERNAME/v2ray $V2RAYDKF --pull --no-cache --compress
+- docker push $DOCKER_USERNAME/v2ray
+after_script:
+- docker images
+- docker logout
+env:
+  global:
+    secure: Rb7IjrAfuNn9ESDDzDvWyMjComs+KwBbrWSUSEAWfBhMdH42hyGL6PfcV5vT3NYo25fbnjDlxtUkkpxZsybo190JqlijRUVOqy+5RLYCY3qUeGXUiPnsZvk5XM/8x8uQAP7yyuZBWEOaK81cf7T06sale8a2ykjK6Nm6qLRIfhjeQ87EIGT4YoFiY9Er7IUJPjul3xjLBqNyTKwvuTRmFzDe3wY/f+uMIjwOknvilYeoRwha6W+B7GQDnMnP4s9cPI7qYv9crC9M2pFg/FNgzi8Zd6NLEU6vIk9efQBhxSQRowPeaf7gyvOwVTo63tRrXZ4cuxpX1p6gLctLsEJAJ07vgMz7njYMlHNCM3xeHSsDJjZV8pMbqKNTyARYymc86o2bmJm1q5WeBxOMfWsw55XOAQibo709liMPyddxcfcxTz06Ymk2pAZ/++WS2MSKHWeR4KBbII/NdhCpXgy7LFZlfENjlqPhxLnH/D93b3YDXzcK9uvi9C4m1qdkw8xJajSKzWGqFZVnf0DjsWC8lQbpzi4H0qJAgGR1es7Sr86FrLkWVQg/ipf/dxglx7GyKrFVr2DzatmrEBjUgmFPpjph5oMnHHGf/b8GSfNzWfiwNx118yoE2K9U4SB7PeZExGkuFMJdraAwT8axkHfQJ3hrGihmFvo5Q2G1r1HyjGI=

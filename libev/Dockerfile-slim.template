@@ -1,0 +1,98 @@
+ARG TAG=stable-slim
+FROM debian:${TAG}
+
+ARG VERSION=3.3.3
+
+LABEL BIN-SERVER=/usr/local/bin/ss-server
+LABEL BIN-CLIENT=/usr/local/bin/ss-local
+LABEL BIN-MANAGER=/usr/local/bin/ss-manager
+LABEL BIN-NAT=/usr/local/bin/ss-nat
+LABEL BIN-REDIR=/usr/local/bin/ss-redir
+LABEL BIN-TUNNEL=/usr/local/bin/ss-tunnel
+
+ARG LIBSODIUM_VER=1.0.18
+ARG MBEDTLS_VER=2.16.3
+
+WORKDIR /ss
+
+ARG RUNTIME_LIBS="libev-dev libudns-dev libc-ares-dev"
+ARG BUILD_LIBS="git-core wget autoconf automake make libtool asciidoc xmlto gettext build-essential libpcre3-dev"
+
+ADD https://github.com/Yelp/dumb-init/releases/download/v1.2.2/dumb-init_1.2.2_amd64 /usr/local/bin/dumb-init
+RUN chmod +x /usr/local/bin/dumb-init
+
+RUN set -ex \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends \
+        ca-certificates netbase ${RUNTIME_LIBS} \
+    && rm -rf /var/lib/apt/lists/* \
+    && savedAptMark="$(apt-mark showmanual)" \
+
+    && apt-get update \
+    && apt-get upgrade -y \
+    && apt-get install -y --no-install-recommends \
+        ${BUILD_LIBS}\
+
+    && wget -O- https://download.libsodium.org/libsodium/releases/libsodium-${LIBSODIUM_VER}.tar.gz | tar zx \
+    && wget -O- https://tls.mbed.org/download/mbedtls-${MBEDTLS_VER}-gpl.tgz | tar zx \
+
+    # installation of libsodium
+    && cd libsodium-${LIBSODIUM_VER} \
+    && ./configure --prefix=/usr \
+    && make && make install \
+    && cd .. && ldconfig \
+
+    # installation of mbedtls
+    && cd mbedtls-${MBEDTLS_VER} \
+    && make SHARED=1 CFLAGS=-fPIC \
+    && make install \
+    && cd .. && ldconfig \
+
+    # installation of simple-obfs
+    && git clone https://github.com/shadowsocks/simple-obfs.git \
+    && cd simple-obfs \
+    && git submodule update --init --recursive \
+    && ./autogen.sh \
+    && ./configure \
+    && make && make install \
+
+    # installation of shadowsocks
+    && git clone https://github.com/shadowsocks/shadowsocks-libev.git \
+    && cd shadowsocks-libev \
+    && git checkout ${VERSION} \
+    && git submodule update --init --recursive \
+
+    && ./autogen.sh \
+    && ./configure --with-sodium-include=/usr/local/include \
+        --with-sodium-lib=/usr/local/lib \
+        --with-mbedtls-include=/usr/local/include \
+        --with-mbedtls-lib=/usr/local/lib \
+    && make && make install \
+    && cd .. \
+
+    && apt-mark auto '.*' > /dev/null \
+    && apt-mark manual $savedAptMark \
+    && find /usr/local -type f -executable -exec ldd '{}' ';' \
+        | awk '/=>/ { print $(NF-1) }' \
+        | sort -u \
+        | xargs -r dpkg-query --search \
+        | cut -d: -f1 \
+        | sort -u \
+        | xargs -r apt-mark manual \
+    && find /usr/local -depth \
+        \( \
+            \( -type d -a \( -name test -o -name tests \) \) \
+            -o \
+            \( -type f -a \( -name '*.pyc' -o -name '*.pyo' \) \) \
+        \) -exec rm -rf '{}' + \
+    && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
+
+    && rm -rf /var/lib/apt/lists/* \
+    && rm -rf /ss/* \
+
+    && ss-server -h \
+    && ss-local -h
+
+USER nobody
+
+ENTRYPOINT ["dumb-init", "--"]

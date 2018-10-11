@@ -1,0 +1,57 @@
+ARG TAG=rc-slim
+FROM python:${TAG}
+
+ARG GIT_LINK="https://github.com/shadowsocks/shadowsocks/archive"
+ARG VERSION=2.9.1
+
+LABEL BIN-SERVER=/usr/local/bin/ssserver
+LABEL BIN-CLIENT=/usr/local/bin/sslocal
+
+WORKDIR /ss
+
+ARG RUNTIME_LIBS="libsodium-dev"
+
+ADD https://github.com/Yelp/dumb-init/releases/download/v1.2.2/dumb-init_1.2.2_amd64 /usr/local/bin/dumb-init
+RUN chmod +x /usr/local/bin/dumb-init
+
+RUN set -ex \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends \
+		ca-certificates netbase ${RUNTIME_LIBS} \
+    && rm -rf /var/lib/apt/lists/* \
+    && savedAptMark="$(apt-mark showmanual)" \
+
+    && apt-get update \
+    && apt-get upgrade -y \
+    && apt-get install -y --no-install-recommends \
+        wget \
+    && wget -O- ${GIT_LINK}/${VERSION}.tar.gz | tar zx \
+    && cd shadowsocks-${VERSION} \
+    && python3 setup.py install \
+
+    && apt-mark auto '.*' > /dev/null \
+    && apt-mark manual $savedAptMark \
+    && find /usr/local -type f -executable -exec ldd '{}' ';' \
+    		| awk '/=>/ { print $(NF-1) }' \
+    		| sort -u \
+    		| xargs -r dpkg-query --search \
+    		| cut -d: -f1 \
+    		| sort -u \
+    		| xargs -r apt-mark manual \
+    && find /usr/local -depth \
+		\( \
+			\( -type d -a \( -name test -o -name tests \) \) \
+			-o \
+			\( -type f -a \( -name '*.pyc' -o -name '*.pyo' \) \) \
+		\) -exec rm -rf '{}' + \
+    && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
+
+    && rm -rf /var/lib/apt/lists/* \
+    && rm -rf /ss/* \
+
+    && ssserver --version \
+    && sslocal --version
+
+USER nobody
+
+ENTRYPOINT ["dumb-init", "--"]
