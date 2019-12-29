@@ -1,0 +1,42 @@
+{
+  "log": {
+    "loglevel": "warning",
+    "access": None,
+    "error": None
+  },
+  "inbounds": [{
+    "port": 1080,
+    "protocol": "vmess",
+    "settings": {
+      "clients": []
+    },
+    "streamSettings": {
+      "network": "ws",
+      "wsSettings": {
+        "path": "/{UserDefine-path}/"
+      }
+    }
+  }],
+  "outbounds": [{
+    "protocol": "freedom",
+    "settings": {}
+  },{
+    "protocol": "blackhole",
+    "settings": {},
+    "tag": "blocked"
+  }],
+  "routing": {
+    "strategy": "rules",
+    "domainStrategy": "IPOnDemand",
+    "settings": {
+      "rules": [
+      {
+        "type": "field",
+        "ip": [
+          "geoip:private"
+        ],
+        "outboundTag": "blocked"
+      }]
+    }
+  },
+}
