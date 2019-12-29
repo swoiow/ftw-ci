@@ -1,0 +1,123 @@
+{
+  "log": {
+    "access": "none",
+    "loglevel": "error"
+  },
+  "inbounds": [
+  {
+    "port": 1080,
+    "listen": "0.0.0.0",
+    "protocol": "socks",
+    "settings": {
+      "udp": true
+    }
+  },
+  {
+    "port": 1081,
+    "listen": "0.0.0.0",
+    "protocol": "http",
+    "settings": {
+      "udp": true
+    }
+  }],
+  "outbounds": [
+  {
+    "mux": {
+      "enabled": true
+    },
+    "protocol": "vmess",
+    "settings": {
+      "vnext": [
+      {
+        "address": "{UserDefine-address}",
+        "port": 443,
+        "users": [{
+          "_metadata": {
+            "ct": "2019-10-07",
+            "usr": "{UserDefine-optional}"
+          },
+          "alterId": 32,
+          "id": "{UserDefine-uuid}",
+          "security": "aes-128-gcm"
+        }]
+      }]
+    },
+    "streamSettings": {
+      "network": "ws",
+      "security": "tls",
+      "tlsSettings": {
+        "allowInsecure": false,
+        "serverName": "{UserDefine-serverName}"
+      }
+    }
+  },
+  {
+    "protocol": "freedom",
+    "settings": {},
+    "tag": "direct"
+  },
+  {
+    "protocol": "blackhole",
+    "settings": {},
+    "tag": "adblock"
+  }],
+  "transport": {
+    "tcpSettings": {},
+    "kcpSettings": {
+      "mtu": 1350,
+      "tti": 50,
+      "uplinkCapacity": 10,
+      "downlinkCapacity": 100,
+      "congestion": false,
+      "readBufferSize": 2,
+      "writeBufferSize": 2,
+      "header": {
+        "type": "none"
+      }
+    },
+    "wsSettings": {
+      "X-UA": "{UserDefine-optional}",
+      "headers": {
+        "User-Agent": "{UserDefine-optional}"
+      },
+      "path": "/{UserDefine-path}/"
+    },
+    "httpSettings": {},
+    "dsSettings": {},
+    "quicSettings": {
+      "security": "chacha20-poly1305",
+      "key": "{UserDefine-key}",
+      "header": {
+        "type": "none"
+      }
+    }
+  },
+  "routing": {
+    "domainStrategy": "IPOnDemand",
+    "rules": [
+    {
+      "domain": [
+        "domain:baidu.com"
+      ],
+      "type": "field",
+      "outboundTag": "adblock"
+    },
+    {
+      "domain": [
+        "geosite:category-ads"
+      ],
+      "type": "field",
+      "outboundTag": "adblock"
+    },
+    {
+      "type": "field",
+      "ip": [
+        "geoip:cn",
+        "geoip:private"
+      ],
+      "outboundTag": "direct"
+    }]
+  },
+  "policy": {},
+  "reverse": {}
+}
