@@ -48,5 +48,7 @@ COPY --from=upx /app/v2ctl /usr/bin/v2ctl
 ADD https://github.com/Ricky-Hao/geoip/releases/latest/download/geoip.dat /usr/bin/geoip.dat
 ADD https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geosite.dat /usr/bin/geosite.dat
 
+RUN chmod +x /usr/bin/geoip.dat /usr/bin/geosite.dat
+
 ENTRYPOINT ["dumb-init", "--"]
 CMD ["v2ray", "-config=/etc/v2ray/config.json"]
