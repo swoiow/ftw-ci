@@ -9,7 +9,8 @@ Travis CI: [![Build Status](https://travis-ci.org/swoiow/ftw-travis-ci.svg?branc
 
 # Crontab
 ```
-0 1 * * * /usr/bin/sh /root/cronTasks/restart.sh
+#0 1 * * * /usr/bin/sh /root/cronTasks/restart.sh
+#0 1 * * * /usr/local/bin/vps_updater updater
 ```
 + ### restart.sh
 ```
