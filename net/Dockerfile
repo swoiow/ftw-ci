@@ -88,7 +88,11 @@ RUN tar --strip-components=1 -xf upx-3.96-amd64_linux.tar.xz && \
 # Make package
 FROM alpine
 LABEL App=Net-tools
-ENV TZ=Asia/Shanghai
+ENV TZ=Asia/Shanghai \
+    V2RAY_LOCATION_CONFIG=/etc/net \
+    V2RAY_LOCATION_ASSET=/usr/data
+ARG GEOIP_URL=https://github.com/Ricky-Hao/geoip/releases/latest/download/geoip.dat
+ARG GEOSITE_URL=https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geosite.dat
 ARG RUNTIME_LIBS="libev-dev udns-dev pcre-dev c-ares-dev mbedtls-dev libsodium-dev"
 
 ADD https://github.com/Yelp/dumb-init/releases/download/v1.2.2/dumb-init_1.2.2_amd64 /usr/bin/dumb-init
@@ -96,17 +100,18 @@ RUN chmod +x /usr/bin/dumb-init
 
 COPY --from=ss-libev /usr/bin/ss-* /usr/bin/
 
-ADD https://github.com/v2ray/ext/raw/master/docker/official/config.json /etc/net/config.json
+ADD https://github.com/v2ray/ext/raw/master/docker/official/config.json ${V2RAY_LOCATION_CONFIG}/config.json
 COPY --from=upx /dist/* /usr/bin/
 RUN ln -s /usr/bin/net /usr/bin/v2ray && \
     ln -s /etc/net /etc/v2ray
 
-ADD https://github.com/Ricky-Hao/geoip/releases/latest/download/geoip.dat /usr/bin/geoip.dat
-ADD https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geosite.dat /usr/bin/geosite.dat
-RUN chmod 766 /usr/bin/geoip.dat /usr/bin/geosite.dat
+ADD ${GEOIP_URL} ${V2RAY_LOCATION_ASSET}/geoip.dat
+ADD ${GEOSITE_URL} ${V2RAY_LOCATION_ASSET}/geosite.dat
+RUN chmod 766 ${V2RAY_LOCATION_ASSET}/geoip.dat ${V2RAY_LOCATION_ASSET}/geosite.dat
 
 RUN apk update && \
     apk upgrade && \
+    mkdir -p /var/log/net && \
     apk add -v --no-cache --update tzdata ca-certificates ${RUNTIME_LIBS} && \
 #    update-ca-certificates && \
 #    apk cache -fv --purge && \
