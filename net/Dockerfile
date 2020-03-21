@@ -9,7 +9,7 @@ WORKDIR /app
 RUN apk add git
 
 # Build core
-FROM golang-env as src
+FROM golang-env as v2
 ENV REPOSITORY=https://github.com/v2ray/v2ray-core.git
 RUN git clone ${REPOSITORY} /app && \
     git fetch --tags
@@ -20,6 +20,18 @@ RUN latestTag=$(git describe --tags `git rev-list --tags --max-count=1`) && \
     sed -i "s/^[ \t]\+codename.\+$/\tcodename = \"${CODENAME}\"/;s/^[ \t]\+build.\+$/\tbuild = \"${BUILDNAME}\"/;" core.go
 RUN go build -o ./v2ray -ldflags "-s -w" -i ./main && chmod +x ./v2ray
 RUN go build -o ./v2ctl -ldflags "-s -w" -i ./infra/control/main && chmod +x ./v2ctl
+
+# Build clash
+FROM golang-env as clash
+ENV REPOSITORY=https://github.com/Dreamacro/clash.git
+RUN git clone ${REPOSITORY} /app && \
+    git fetch --tags
+RUN latestTag=$(git describe --tags `git rev-list --tags --max-count=1`) && \
+    git checkout $latestTag && \
+    BUILDTIME=$(date +%Y_%m_%d)
+RUN go build -ldflags '-X "github.com/Dreamacro/clash/constant.Version=${latestTag}" \
+		-X "github.com/Dreamacro/clash/constant.BuildTime=${BUILDTIME}" \
+		-w -s'  -o ./clash && chmod +x ./clash
 
 # Build kcptun
 FROM golang-env as kcptun
@@ -72,8 +84,9 @@ RUN latestTag=$(git describe --tags `git rev-list --tags --max-count=1`) && \
 FROM alpine as upx
 WORKDIR /app
 RUN apk add wget && mkdir -p /dist
-COPY --from=src /app/v2ray /app/net
-COPY --from=src /app/v2ctl /app/v2ctl
+COPY --from=v2 /app/v2ray /app/net
+COPY --from=v2 /app/v2ctl /app/v2ctl
+COPY --from=clash /app/clash /app/clash
 COPY --from=plugin /app/v2ray-plugin /app/v2ray-plugin
 COPY --from=kcptun /app/kcptun-client /app/kcptun-client
 COPY --from=kcptun /app/kcptun-server /app/kcptun-server
@@ -81,6 +94,7 @@ RUN wget https://github.com/upx/upx/releases/download/v3.96/upx-3.96-amd64_linux
 RUN tar --strip-components=1 -xf upx-3.96-amd64_linux.tar.xz && \
     ./upx --lzma -9 -f -o /dist/net /app/net && \
     ./upx --lzma -9 -f -o /dist/v2ctl /app/v2ctl && \
+    ./upx --lzma -9 -f -o /dist/clash /app/clash && \
     ./upx --lzma -9 -f -o /dist/v2ray-plugin /app/v2ray-plugin && \
     ./upx --lzma -9 -f -o /dist/kcptun-client /app/kcptun-client && \
     ./upx --lzma -9 -f -o /dist/kcptun-server /app/kcptun-server
@@ -88,11 +102,14 @@ RUN tar --strip-components=1 -xf upx-3.96-amd64_linux.tar.xz && \
 # Make package
 FROM alpine
 LABEL App=Net-tools
+
 ENV TZ=Asia/Shanghai \
     V2RAY_LOCATION_CONFIG=/etc/net \
     V2RAY_LOCATION_ASSET=/usr/data
+
 ARG GEOIP_URL=https://github.com/Ricky-Hao/geoip/releases/latest/download/geoip.dat
 ARG GEOSITE_URL=https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geosite.dat
+ARG MMDB_URL=https://github.com/Dreamacro/maxmind-geoip/releases/latest/download/Country.mmdb
 ARG RUNTIME_LIBS="libev-dev udns-dev pcre-dev c-ares-dev mbedtls-dev libsodium-dev"
 
 ADD https://github.com/Yelp/dumb-init/releases/download/v1.2.2/dumb-init_1.2.2_amd64 /usr/bin/dumb-init
@@ -107,7 +124,9 @@ RUN ln -s /usr/bin/net /usr/bin/v2ray && \
 
 ADD ${GEOIP_URL} ${V2RAY_LOCATION_ASSET}/geoip.dat
 ADD ${GEOSITE_URL} ${V2RAY_LOCATION_ASSET}/geosite.dat
-RUN chmod 766 ${V2RAY_LOCATION_ASSET}/geoip.dat ${V2RAY_LOCATION_ASSET}/geosite.dat
+ADD ${MMDB_URL} /usr/bin/Country.mmdb
+
+RUN chmod 766 ${V2RAY_LOCATION_ASSET}/geoip.dat ${V2RAY_LOCATION_ASSET}/geosite.dat /usr/bin/Country.mmdb
 
 RUN apk update && \
     apk upgrade && \
