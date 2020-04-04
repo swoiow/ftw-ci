@@ -22,16 +22,16 @@ RUN go build -o ./v2ray -ldflags "-s -w" -i ./main && chmod +x ./v2ray
 RUN go build -o ./v2ctl -ldflags "-s -w" -i ./infra/control/main && chmod +x ./v2ctl
 
 # Build clash
-FROM golang-env as clash
-ENV REPOSITORY=https://github.com/Dreamacro/clash.git
-RUN git clone ${REPOSITORY} /app && \
-    git fetch --tags
-RUN latestTag=$(git describe --tags `git rev-list --tags --max-count=1`) && \
-    git checkout $latestTag && \
-    BUILDTIME=$(date +%Y_%m_%d) && \
-    go build -ldflags '-X "github.com/Dreamacro/clash/constant.Version=${latestTag}" \
-		-X "github.com/Dreamacro/clash/constant.BuildTime=${BUILDTIME}" \
-		-w -s'  -o ./clash && chmod +x ./clash
+#FROM golang-env as clash
+#ENV REPOSITORY=https://github.com/Dreamacro/clash.git
+#RUN git clone ${REPOSITORY} /app && \
+#    git fetch --tags
+#RUN latestTag=$(git describe --tags `git rev-list --tags --max-count=1`) && \
+#    git checkout $latestTag && \
+#    BUILDTIME=$(date +%Y_%m_%d) && \
+#    go build -ldflags '-X "github.com/Dreamacro/clash/constant.Version=${latestTag}" \
+#		-X "github.com/Dreamacro/clash/constant.BuildTime=${BUILDTIME}" \
+#		-w -s'  -o ./clash && chmod +x ./clash
 
 # Build kcptun
 FROM golang-env as kcptun
@@ -86,7 +86,6 @@ WORKDIR /app
 ADD https://github.com/upx/upx/releases/download/v3.96/upx-3.96-amd64_linux.tar.xz /app/
 COPY --from=v2 /app/v2ray /app/net
 COPY --from=v2 /app/v2ctl /app/v2ctl
-COPY --from=clash /app/clash /app/clash
 COPY --from=plugin /app/v2ray-plugin /app/v2ray-plugin
 COPY --from=kcptun /app/kcptun-client /app/kcptun-client
 COPY --from=kcptun /app/kcptun-server /app/kcptun-server
@@ -95,7 +94,6 @@ RUN set -x && \
     tar --strip-components=1 -xf upx-3.96-amd64_linux.tar.xz && \
     ./upx --lzma -9 -f -o /dist/net /app/net && \
     ./upx --lzma -9 -f -o /dist/v2ctl /app/v2ctl && \
-    ./upx --lzma -9 -f -o /dist/clash /app/clash && \
     ./upx --lzma -9 -f -o /dist/v2ray-plugin /app/v2ray-plugin && \
     ./upx --lzma -9 -f -o /dist/kcptun-client /app/kcptun-client && \
     ./upx --lzma -9 -f -o /dist/kcptun-server /app/kcptun-server
@@ -125,9 +123,10 @@ RUN ln -s /usr/bin/net /usr/bin/v2ray && \
 
 ADD ${GEOIP_URL} ${V2RAY_LOCATION_ASSET}/geoip.dat
 ADD ${GEOSITE_URL} ${V2RAY_LOCATION_ASSET}/geosite.dat
-ADD ${MMDB_URL} /usr/bin/Country.mmdb
+#ADD ${MMDB_URL} /usr/bin/Country.mmdb
 
-RUN chmod 766 ${V2RAY_LOCATION_ASSET}/geoip.dat ${V2RAY_LOCATION_ASSET}/geosite.dat /usr/bin/Country.mmdb
+RUN chmod 766 ${V2RAY_LOCATION_ASSET}/geoip.dat ${V2RAY_LOCATION_ASSET}/geosite.dat
+# /usr/bin/Country.mmdb
 
 RUN set -x && \
     apk update && \
