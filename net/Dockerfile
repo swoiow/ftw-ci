@@ -83,15 +83,16 @@ RUN latestTag=$(git describe --tags `git rev-list --tags --max-count=1`) && \
 # Make minifily
 FROM alpine as upx
 WORKDIR /app
-RUN apk add wget && mkdir -p /dist
+ADD https://github.com/upx/upx/releases/download/v3.96/upx-3.96-amd64_linux.tar.xz /app/
 COPY --from=v2 /app/v2ray /app/net
 COPY --from=v2 /app/v2ctl /app/v2ctl
 COPY --from=clash /app/clash /app/clash
 COPY --from=plugin /app/v2ray-plugin /app/v2ray-plugin
 COPY --from=kcptun /app/kcptun-client /app/kcptun-client
 COPY --from=kcptun /app/kcptun-server /app/kcptun-server
-RUN wget https://github.com/upx/upx/releases/download/v3.96/upx-3.96-amd64_linux.tar.xz
-RUN tar --strip-components=1 -xf upx-3.96-amd64_linux.tar.xz && \
+RUN set -x && \
+    mkdir -p /dist && \
+    tar --strip-components=1 -xf upx-3.96-amd64_linux.tar.xz && \
     ./upx --lzma -9 -f -o /dist/net /app/net && \
     ./upx --lzma -9 -f -o /dist/v2ctl /app/v2ctl && \
     ./upx --lzma -9 -f -o /dist/clash /app/clash && \
@@ -128,12 +129,12 @@ ADD ${MMDB_URL} /usr/bin/Country.mmdb
 
 RUN chmod 766 ${V2RAY_LOCATION_ASSET}/geoip.dat ${V2RAY_LOCATION_ASSET}/geosite.dat /usr/bin/Country.mmdb
 
-RUN apk update && \
+RUN set -x && \
+    apk update && \
     apk upgrade && \
     mkdir -p /var/log/net && \
     apk add -v --no-cache --update tzdata ca-certificates ${RUNTIME_LIBS} && \
-#    update-ca-certificates && \
-#    apk cache -fv --purge && \
+    update-ca-certificates && \
     rm -rf /var/cache/apk/*
 
 ENTRYPOINT ["dumb-init", "--"]
