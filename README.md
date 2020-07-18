@@ -2,7 +2,7 @@
 Cron Jobs to build images by using travis-ci.
 
 + ~~shadowsocks (Python version)~~
-+ shadowsocks-libev (C version)
++ ~~shadowsocks-libev (C version)~~
 + V2ray (V2ray+Random+upx / ss+V2ray-plug)
 + Net (V2ray / shadowsocks-libev+V2ray-plug / kcptun)
 
