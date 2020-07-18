@@ -1,5 +1,3 @@
-FROM v2ray as v2ray-bin
-
 # Make golang env
 FROM golang:alpine as golang-env
 
@@ -11,29 +9,29 @@ WORKDIR /app
 RUN apk add git
 
 # Build core
-#FROM golang-env as v2
-#ENV REPOSITORY=https://github.com/v2ray/v2ray-core.git
-#RUN git clone ${REPOSITORY} /app && \
-#    git fetch --tags
-#RUN latestTag=$(git describe --tags `git rev-list --tags --max-count=1`) && \
-#    git checkout $latestTag && \
-#    CODENAME=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w ${1:-64} | head -n 1) && \
-#    BUILDNAME=$(date +%Y_%m_%d) && \
-#    sed -i "s/^[ \t]\+codename.\+$/\tcodename = \"${CODENAME}\"/;s/^[ \t]\+build.\+$/\tbuild = \"${BUILDNAME}\"/;" core.go
-#RUN go build -o ./v2ray -ldflags "-s -w" -i ./main && chmod +x ./v2ray
-#RUN go build -o ./v2ctl -ldflags "-s -w" -i ./infra/control/main && chmod +x ./v2ctl
+FROM golang-env as v2
+ENV REPOSITORY=https://github.com/v2ray/v2ray-core.git
+RUN git clone ${REPOSITORY} /app && \
+    git fetch --tags
+RUN latestTag=$(git describe --tags `git rev-list --tags --max-count=1`) && \
+    git checkout $latestTag && \
+    CODENAME=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w ${1:-64} | head -n 1) && \
+    BUILDNAME=$(date +%Y_%m_%d) && \
+    sed -i "s/^[ \t]\+codename.\+$/\tcodename = \"${CODENAME}\"/;s/^[ \t]\+build.\+$/\tbuild = \"${BUILDNAME}\"/;" core.go
+RUN go build -o ./v2ray -ldflags "-s -w" -i ./main && chmod +x ./v2ray
+RUN go build -o ./v2ctl -ldflags "-s -w" -i ./infra/control/main && chmod +x ./v2ctl
 
 # Build clash
-#FROM golang-env as clash
-#ENV REPOSITORY=https://github.com/Dreamacro/clash.git
-#RUN git clone ${REPOSITORY} /app && \
-#    git fetch --tags
-#RUN latestTag=$(git describe --tags `git rev-list --tags --max-count=1`) && \
-#    git checkout $latestTag && \
-#    BUILDTIME=$(date +%Y_%m_%d) && \
-#    go build -ldflags '-X "github.com/Dreamacro/clash/constant.Version=${latestTag}" \
-#		-X "github.com/Dreamacro/clash/constant.BuildTime=${BUILDTIME}" \
-#		-w -s'  -o ./clash && chmod +x ./clash
+FROM golang-env as clash
+ENV REPOSITORY=https://github.com/Dreamacro/clash.git
+RUN git clone ${REPOSITORY} /app && \
+    git fetch --tags
+RUN latestTag=$(git describe --tags `git rev-list --tags --max-count=1`) && \
+    git checkout $latestTag && \
+    BUILDTIME=$(date +%Y_%m_%d) && \
+    go build -ldflags '-X "github.com/Dreamacro/clash/constant.Version=${latestTag}" \
+		-X "github.com/Dreamacro/clash/constant.BuildTime=${BUILDTIME}" \
+		-w -s'  -o ./clash && chmod +x ./clash
 
 # Build kcptun
 FROM golang-env as kcptun
@@ -86,14 +84,16 @@ RUN go build -o ./v2ray-plugin -ldflags "-s -w"
 FROM alpine as upx
 WORKDIR /app
 ADD https://github.com/upx/upx/releases/download/v3.96/upx-3.96-amd64_linux.tar.xz /app/
+COPY --from=v2 /app/v2ray /app/net
+COPY --from=v2 /app/v2ctl /app/v2ctl
 COPY --from=plugin /app/v2ray-plugin /app/v2ray-plugin
 COPY --from=kcptun /app/kcptun-client /app/kcptun-client
 COPY --from=kcptun /app/kcptun-server /app/kcptun-server
 RUN set -x && \
     mkdir -p /dist && \
     tar --strip-components=1 -xf upx-3.96-amd64_linux.tar.xz && \
-#    ./upx --lzma -9 -f -o /dist/net /app/net && \
-#    ./upx --lzma -9 -f -o /dist/v2ctl /app/v2ctl && \
+    ./upx --lzma -9 -f -o /dist/net /app/net && \
+    ./upx --lzma -9 -f -o /dist/v2ctl /app/v2ctl && \
     ./upx --lzma -9 -f -o /dist/v2ray-plugin /app/v2ray-plugin && \
     ./upx --lzma -9 -f -o /dist/kcptun-client /app/kcptun-client && \
     ./upx --lzma -9 -f -o /dist/kcptun-server /app/kcptun-server
@@ -115,8 +115,6 @@ ADD https://github.com/Yelp/dumb-init/releases/download/v1.2.2/dumb-init_1.2.2_a
 RUN chmod +x /usr/bin/dumb-init
 
 COPY --from=shadowsocks/shadowsocks-libev /usr/bin/ss-* /usr/bin/
-COPY --from=v2ray-bin /usr/bin/v2ray /app/net
-COPY --from=v2ray-bin /usr/bin/v2ctl /app/v2ctl
 
 ADD https://github.com/v2ray/ext/raw/master/docker/official/config.json ${V2RAY_LOCATION_CONFIG}/config.json
 COPY --from=upx /dist/* /usr/bin/
