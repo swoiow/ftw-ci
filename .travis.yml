@@ -17,7 +17,7 @@ script:
 - make build-v2ray
 - make push-v2ray
 - make build-net
-- make build-net
+- make push-net
 after_script:
 - docker images
 - docker logout
