@@ -10,7 +10,7 @@ RUN apk add git
 
 # Build core
 FROM golang-env as v2
-ENV REPOSITORY=https://github.com/v2ray/v2ray-core.git
+ENV REPOSITORY=https://github.com/v2fly/v2ray-core.git
 RUN git clone ${REPOSITORY} /app && \
     git fetch --tags
 RUN latestTag=$(git describe --tags `git rev-list --tags --max-count=1`) && \
@@ -106,7 +106,7 @@ ENV TZ=Asia/Shanghai \
     V2RAY_LOCATION_CONFIG=/etc/net \
     V2RAY_LOCATION_ASSET=/usr/data
 
-ARG GEOIP_URL=https://github.com/Ricky-Hao/geoip/releases/latest/download/geoip.dat
+ARG GEOIP_URL=https://github.com/Loyalsoldier/geoip/raw/release/geoip.dat
 ARG GEOSITE_URL=https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geosite.dat
 ARG MMDB_URL=https://github.com/Dreamacro/maxmind-geoip/releases/latest/download/Country.mmdb
 ARG RUNTIME_LIBS="libev-dev udns-dev pcre-dev c-ares-dev mbedtls-dev libsodium-dev"
