@@ -14,8 +14,8 @@ before_script:
 - make docker-login
 script:
 #- make build-ss
-- make build-v2ray
-- make push-v2ray
+#- make build-v2ray
+#- make push-v2ray
 - make build-net
 - make push-net
 after_script:
