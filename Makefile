@@ -1,5 +1,4 @@
 TRAVIS_BUILD_DIR := $(PWD)
-DOCKER_USERNAME := docker_user
 
 build-ss:
 	python build.py
