@@ -15,10 +15,9 @@ push-v2ray:
 
 build-net:
 	docker build \
-		--build-arg DOCKER_USERNAME=${DOCKER_USERNAME} \
 		-t ${DOCKER_USERNAME}/net \
 		-f ${TRAVIS_BUILD_DIR}/vendors/net/Dockerfile \
-		--pull --no-cache --compress .
+		--no-cache --compress .
 
 push-net:
 	docker push ${DOCKER_USERNAME}/net
@@ -33,4 +32,4 @@ build-v2fly: build-base
 	docker build \
 		-t v2fly-dist \
 		-f ${TRAVIS_BUILD_DIR}/vendors/v2fly/Dockerfile \
-		--pull --no-cache --compress .
+		--no-cache --compress .

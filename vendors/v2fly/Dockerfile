@@ -5,7 +5,7 @@ ENV CGO_ENABLED=0 \
     GOARCH=amd64
 
 WORKDIR /app
-RUN git clone https://github.com/v2ray/v2ray-core.git /app && \
+RUN git clone https://github.com/v2fly/v2ray-core.git /app && \
     git fetch --tags
 RUN latestTag=$(git describe --tags `git rev-list --tags --max-count=1`) && \
     git checkout $latestTag && \
