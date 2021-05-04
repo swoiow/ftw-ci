@@ -1,0 +1,95 @@
+# https://blog.csdn.net/CHAOS_ORDER/article/details/114147109
+# https://coredns.io/plugins/forward/
+# https://coredns.io/plugins/import/
+# https://coredns.io/plugins/cache/
+
+(global_cache) {
+    cache {
+        # [5, 60]
+        success 65536 3600 300
+        # [1, 10]
+        denial 4096 600 60
+        prefetch 1 15m 10%
+    }
+}
+
+(server_cache) {
+    cache {
+        success 65536 1800 120
+        denial 4096 600 60
+    }
+}
+
+(global_forward) {
+    force_tcp
+    policy sequential
+    max_concurrent 5
+    health_check 10s
+}
+
+.:53 {
+    bind 0.0.0.0
+#    import global_cache
+    forward . 127.0.0.1:5303 127.0.0.1:5304
+    log
+    errors
+}
+
+#.:530 {
+#    bind 0.0.0.0
+#    import global_cache
+#    forward . 127.0.0.1:5303 127.0.0.1:5304
+#    errors
+#}
+
+
+.:5353 {
+    # prometheus 127.0.0.1:9253
+    bind 127.0.0.1
+#    import global_cache
+    forward . 127.0.0.1:5301 127.0.0.1:5302
+    log
+    errors
+}
+
+# =====
+
+.:5301 {
+    bind 127.0.0.1
+    import server_cache
+    errors
+
+    forward . tls://8.8.8.8 tls://8.8.4.4 {
+#        tls_servername dns.google
+        import global_forward
+    }
+}
+
+.:5302 {
+    bind 127.0.0.1
+    import server_cache
+    errors
+
+    forward . tls://1.1.1.1 tls://1.0.0.1 {
+#        tls_servername cloudflare-dns.com
+        import global_forward
+    }
+}
+
+.:5303 {
+    bind 127.0.0.1
+    forward . tls://223.5.5.5 tls://223.6.6.6 {
+#        tls_servername dns.alidns.com
+        import global_forward
+    }
+    errors
+}
+
+.:5304 {
+    bind 127.0.0.1
+    forward . tls://119.29.29.29 {
+#        tls_servername dot.pub
+        import global_forward
+    }
+    errors
+}
