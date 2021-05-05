@@ -29,7 +29,11 @@ RUN chmod +x /usr/bin/dumb-init
 
 ADD https://github.com/v2ray/ext/raw/master/docker/official/config.json ${V2RAY_LOCATION_CONFIG}/config.json
 COPY --from=upx /dist/* /usr/bin/
-RUN ln -s /usr/bin/net /usr/bin/v2ray && \
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends ca-certificates && \
+    rm -rf /root/.cache /tmp/* /var/lib/apt/* /var/cache/* /var/log/* && \
+    update-ca-certificates && \
+    ln -s /usr/bin/net /usr/bin/v2ray && \
     ln -s /etc/net /etc/v2ray
 
 ADD ${GEOIP_URL} ${V2RAY_LOCATION_ASSET}/geoip.dat
