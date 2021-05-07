@@ -78,6 +78,7 @@
 
 .:5303 {
     bind 127.0.0.1
+    import server_cache
     forward . tls://223.5.5.5 tls://223.6.6.6 {
 #        tls_servername dns.alidns.com
         import global_forward
@@ -87,6 +88,7 @@
 
 .:5304 {
     bind 127.0.0.1
+    import server_cache
     forward . tls://119.29.29.29 {
 #        tls_servername dot.pub
         import global_forward
