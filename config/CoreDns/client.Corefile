@@ -27,13 +27,13 @@
     health_check 10s
 }
 
-.:53 {
-    bind 0.0.0.0
-#    import global_cache
-    forward . 127.0.0.1:5303 127.0.0.1:5304
-    log
-    errors
-}
+#.:53 {
+#    bind 0.0.0.0
+##    import global_cache
+#    forward . 127.0.0.1:5303 127.0.0.1:5304
+#    log
+#    errors
+#}
 
 #.:530 {
 #    bind 0.0.0.0
@@ -60,7 +60,7 @@
     errors
 
     forward . tls://8.8.8.8 tls://8.8.4.4 {
-#        tls_servername dns.google
+       # tls_servername dns.google
         import global_forward
     }
 }
@@ -71,7 +71,7 @@
     errors
 
     forward . tls://1.1.1.1 tls://1.0.0.1 {
-#        tls_servername cloudflare-dns.com
+       # tls_servername cloudflare-dns.com
         import global_forward
     }
 }
@@ -80,18 +80,19 @@
     bind 127.0.0.1
     import server_cache
     forward . tls://223.5.5.5 tls://223.6.6.6 {
-#        tls_servername dns.alidns.com
+       # tls_servername dns.alidns.com
         import global_forward
     }
+    log
     errors
 }
 
-.:5304 {
-    bind 127.0.0.1
-    import server_cache
-    forward . tls://119.29.29.29 {
-#        tls_servername dot.pub
-        import global_forward
-    }
-    errors
-}
+#.:5304 {
+#    bind 127.0.0.1
+#    import server_cache
+#    forward . tls://119.29.29.29 {
+#       # tls_servername dot.pub
+#        import global_forward
+#    }
+#    errors
+#}

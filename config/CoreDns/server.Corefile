@@ -27,21 +27,33 @@
     health_check 10s
 }
 
-.:53 {
-    # prometheus 127.0.0.1:9253
+(main_node) {
     bind 127.0.0.1
-    import global_cache
-    forward . 127.0.0.1:5301 127.0.0.1:5302
+    loadbalance round_robin
+    import server_cache
+    errors
+}
+
+(denial_log) {
     log {
         class denial error
     }
+}
+
+
+.:53 {
+    # prometheus 127.0.0.1:9253
+    import global_cache
+    import denial_log
+
+    bind 127.0.0.1
+    loadbalance round_robin
+    forward . 127.0.0.1:5301 127.0.0.1:5302
     errors
 }
 
 .:5301 {
-    bind 127.0.0.1
-    import server_cache
-    errors
+    import main_node
 
     forward . tls://8.8.8.8 tls://8.8.4.4 {
         tls_servername dns.google
@@ -50,9 +62,7 @@
 }
 
 .:5302 {
-    bind 127.0.0.1
-    import server_cache
-    errors
+    import main_node
 
     forward . tls://1.1.1.1 tls://1.0.0.1 {
         tls_servername cloudflare-dns.com
