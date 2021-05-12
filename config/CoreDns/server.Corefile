@@ -6,7 +6,7 @@
 (global_cache) {
     cache {
         # [5, 60]
-        success 65536 3600 300
+        success 65536 1800 300
         # [1, 10]
         denial 4096 600 60
         prefetch 1 15m 10%
@@ -15,13 +15,11 @@
 
 (server_cache) {
     cache {
-        success 65536 1800 120
-        denial 4096 600 60
+        success 32768 600 30
     }
 }
 
 (global_forward) {
-    force_tcp
     policy sequential
     max_concurrent 10
     health_check 10s
@@ -40,15 +38,20 @@
     }
 }
 
+(prometheus) {
+    prometheus 127.0.0.1:9253
+}
 
 .:53 {
-    # prometheus 127.0.0.1:9253
+    # import prometheus
+    # import denial_log
     import global_cache
-    import denial_log
 
     bind 127.0.0.1
     loadbalance round_robin
     forward . 127.0.0.1:5301 127.0.0.1:5302
+
+    log
     errors
 }
 
