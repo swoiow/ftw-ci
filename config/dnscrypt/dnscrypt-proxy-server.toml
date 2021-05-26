@@ -1,0 +1,162 @@
+server_names = [
+    "cloudflare",
+    "nextdns",
+    "quad9-dnscrypt-ip4-nofilter-pri",
+]
+
+listen_addresses = ['127.0.0.1:53']
+
+
+## Maximum number of simultaneous client connections to accept
+max_clients = 250
+user_name = 'nobody'
+
+
+## Require servers (from static + remote sources) to satisfy specific properties
+ipv4_servers = true
+ipv6_servers = false
+dnscrypt_servers = true
+doh_servers = true
+
+
+## Require servers defined by remote sources to satisfy specific properties
+require_dnssec = false
+require_nolog = false
+require_nofilter = false
+disabled_server_names = []
+force_tcp = true
+timeout = 5000
+keepalive = 30
+
+## Add EDNS-client-subnet information to outgoing queries
+#edns_client_subnet = [
+#    # GZ
+#    "14.119.113.22/32",
+#    "139.159.208.89/32",
+#    # HK
+#    "119.28.80.58/32",
+#    "159.138.16.98/32"
+#]
+
+
+## Response for blocked queries. Options are `refused`, `hinfo` (default) or
+## an IP response. To give an IP response, use the format `a:<IPv4>,aaaa:<IPv6>`.
+## Using the `hinfo` option means that some responses will be lies.
+## Unfortunately, the `hinfo` option appears to be required for Android 8+
+blocked_query_response = 'refused'
+
+
+## Load-balancing strategy: 'p2' (default), 'ph', 'p<n>', 'first' or 'random'
+## Randomly choose 1 of the fastest 2, half, n, 1 or all live servers by latency.
+## The response quality still depends on the server itself.
+lb_strategy = 'p5'
+
+## Set to `true` to constantly try to estimate the latency of all the resolvers
+## and adjust the load-balancing parameters accordingly, or to `false` to disable.
+## Default is `true` that makes 'p2' `lb_strategy` work well.
+# lb_estimator = false
+
+
+## Log level (0-6, default: 2 - 0 is very verbose, 6 only contains fatal errors)
+# log_level = 0
+
+## Log file for the application, as an alternative to sending logs to
+## the standard system logging service (syslog/Windows event log).
+##
+## This file is different from other log files, and will not be
+## automatically rotated by the application.
+# log_file = 'dnscrypt-proxy.log'
+
+
+## When using a log file, only keep logs from the most recent launch.
+# log_file_latest = true
+
+
+## Use the system logger (syslog on Unix, Event Log on Windows)
+# use_syslog = true
+
+
+## Delay, in minutes, after which certificates are reloaded
+cert_refresh_delay = 240
+
+
+## Fallback resolvers
+fallback_resolvers = [
+    '1.1.1.1:53',
+    '8.8.8.8:53'
+]
+
+
+## Always use the fallback resolver before the system DNS settings.
+ignore_system_dns = true
+
+
+## Maximum time (in seconds) to wait for network connectivity before
+## initializing the proxy.
+## Useful if the proxy is automatically started at boot, and network
+## connectivity is not guaranteed to be immediately available.
+## Use 0 to not test for connectivity at all (not recommended),
+## and -1 to wait as much as possible.
+netprobe_timeout = 60
+netprobe_address = '1.1.1.1:5353'
+
+
+## Automatic log files rotation
+log_files_max_size = 3
+log_files_max_age = 3
+log_files_max_backups = 1
+
+
+#########################
+#        Filters        #
+#########################
+
+block_ipv6 = true
+block_unqualified = true
+block_undelegated = true
+reject_ttl = 600
+
+
+## Enable a DNS cache to reduce latency and outgoing traffic
+cache = true
+cache_size = 30000
+cache_min_ttl = 3600
+cache_max_ttl = 86400
+cache_neg_min_ttl = 3600
+cache_neg_max_ttl = 3600
+
+## Log client queries to a file
+[query_log]
+file = '/var/log/dns-query.log'
+format = 'tsv'
+ignored_qtypes = ['DNSKEY', 'NS']
+
+[nx_log]
+file = 'nx.log'
+format = 'tsv'
+
+
+#########################
+#        Servers        #
+#########################
+
+[sources]
+
+[sources.'public-resolvers']
+urls = [
+    'https://raw.githubusercontent.com/DNSCrypt/dnscrypt-resolvers/master/v3/public-resolvers.md',
+    'https://download.dnscrypt.info/resolvers-list/v3/public-resolvers.md',
+    'https://ipv6.download.dnscrypt.info/resolvers-list/v3/public-resolvers.md',
+    'https://download.dnscrypt.net/resolvers-list/v3/public-resolvers.md'
+]
+cache_file = 'public-resolvers.md'
+minisign_key = 'RWQf6LRCGA9i53mlYecO4IzT51TGPpvWucNSCh1CBM0QTaLn73Y7GFO3'
+refresh_delay = 72
+prefix = ''
+
+[sources.'relays']
+urls = ['https://raw.githubusercontent.com/DNSCrypt/dnscrypt-resolvers/master/v3/relays.md', 'https://download.dnscrypt.info/resolvers-list/v3/relays.md', 'https://ipv6.download.dnscrypt.info/resolvers-list/v3/relays.md', 'https://download.dnscrypt.net/resolvers-list/v3/relays.md']
+cache_file = 'relays.md'
+minisign_key = 'RWQf6LRCGA9i53mlYecO4IzT51TGPpvWucNSCh1CBM0QTaLn73Y7GFO3'
+refresh_delay = 72
+prefix = ''

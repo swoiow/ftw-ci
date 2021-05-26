@@ -1,0 +1,336 @@
+##################################
+#         Global settings        #
+##################################
+## Servers from the "public-resolvers" source (see down below) can
+## be viewed here: https://dnscrypt.info/public-servers
+server_names = [
+    "cloudflare",
+    "cloudflare-security",
+    "alidns-doh",
+    "dnspod-doh",
+    "google",
+    'nextdns',
+    'quad101',
+    #    'quad9-dnscrypt-ip4-filter-pri',
+    #    'jp.tiar.app',
+    #    'adguard-dns'
+]
+
+listen_addresses = ['127.0.0.1:15353']
+## Maximum number of simultaneous client connections to accept
+max_clients = 100
+#user_name = 'nobody'
+
+## Require servers (from static + remote sources) to satisfy specific properties
+ipv4_servers = true
+ipv6_servers = false
+dnscrypt_servers = true
+doh_servers = true
+
+## Require servers defined by remote sources to satisfy specific properties
+require_dnssec = false
+require_nolog = false
+require_nofilter = false
+disabled_server_names = []
+
+## Always use TCP to connect to upstream servers.
+force_tcp = false
+
+
+## SOCKS proxy& HTTP/HTTPS proxy
+# proxy = 'socks5://127.0.0.1:9050'
+# http_proxy = 'http://127.0.0.1:8888'
+
+
+## How long a DNS query will wait for a response, in milliseconds.
+timeout = 5000
+
+
+## Keepalive for HTTP (HTTPS, HTTP/2) queries, in seconds
+keepalive = 30
+
+
+## Add EDNS-client-subnet information to outgoing queries
+edns_client_subnet = [
+    # GZ
+    "14.119.113.22/32",
+    "139.159.208.89/32",
+    # HK
+    #    "119.28.80.58/32",
+    #    "159.138.16.98/32"
+]
+
+
+## Response for blocked queries. Options are `refused`, `hinfo` (default) or
+## an IP response. To give an IP response, use the format `a:<IPv4>,aaaa:<IPv6>`.
+## Using the `hinfo` option means that some responses will be lies.
+## Unfortunately, the `hinfo` option appears to be required for Android 8+
+blocked_query_response = 'refused'
+
+
+## Load-balancing strategy: 'p2' (default), 'ph', 'p<n>', 'first' or 'random'
+## Randomly choose 1 of the fastest 2, half, n, 1 or all live servers by latency.
+## The response quality still depends on the server itself.
+lb_strategy = 'p3'
+
+## Set to `true` to constantly try to estimate the latency of all the resolvers
+## and adjust the load-balancing parameters accordingly, or to `false` to disable.
+## Default is `true` that makes 'p2' `lb_strategy` work well.
+lb_estimator = true
+
+
+## Log level (0-6, default: 2 - 0 is very verbose, 6 only contains fatal errors)
+#log_level = 0
+
+
+## Log file for the application, as an alternative to sending logs to
+## the standard system logging service (syslog/Windows event log).
+#log_file = '/var/log/dnscrypt-proxy.log'
+# log_file_latest = true
+# use_syslog = true
+cert_refresh_delay = 240
+
+
+## DNSCrypt: Create a new, unique key for every single DNS query
+## This may improve privacy but can also have a significant impact on CPU usage
+## Only enable if you don't have a lot of network load
+# dnscrypt_ephemeral_keys = false
+# tls_disable_session_tickets = false
+
+
+## Fallback resolvers
+fallback_resolvers = [
+    '10.10.10.99:53',
+    '1.1.1.1:53',
+    '8.8.8.8:53',
+    '223.5.5.5:53'
+]
+
+
+## Always use the fallback resolver before the system DNS settings.
+ignore_system_dns = true
+
+
+## Maximum time (in seconds) to wait for network connectivity before
+## initializing the proxy.
+## Useful if the proxy is automatically started at boot, and network
+## connectivity is not guaranteed to be immediately available.
+## Use 0 to not test for connectivity at all (not recommended),
+## and -1 to wait as much as possible.
+netprobe_timeout = 30
+
+## Address and port to try initializing a connection to, just to check
+## if the network is up. It can be any address and any port, even if
+## there is nothing answering these on the other side. Just don't use
+## a local address, as the goal is to check for Internet connectivity.
+## On Windows, a datagram with a single, nul byte will be sent, only
+## when the system starts.
+## On other operating systems, the connection will be initialized
+## but nothing will be sent at all.
+netprobe_address = '1.1.1.1:53'
+
+
+## Automatic log files rotation
+log_files_max_size = 3
+log_files_max_age = 3
+log_files_max_backups = 1
+
+
+
+#########################
+#        Filters        #
+#########################
+
+block_ipv6 = false
+block_unqualified = true
+block_undelegated = true
+reject_ttl = 1800
+
+
+
+##################################################################################
+#        Route queries for specific domains to a dedicated set of servers        #
+##################################################################################
+
+forwarding_rules = 'rules/forward.lst.txt'
+
+
+
+###############################
+#        Cloaking rules       #
+###############################
+
+# cloaking_rules = 'cloaking-rules.txt'
+# cloak_ttl = 600
+
+
+
+###########################
+#        DNS cache        #
+###########################
+
+cache = true
+cache_size = 30000
+cache_min_ttl = 3600
+cache_max_ttl = 86400
+cache_neg_min_ttl = 600
+cache_neg_max_ttl = 3600
+
+
+
+########################################
+#        Captive portal handling       #
+########################################
+
+[captive_portals]
+# map_file = 'example-captive-portals.txt'
+
+
+
+###############################
+#        Query logging        #
+###############################
+
+[query_log]
+file = '/var/log/dnscrypt-query.log'
+format = 'tsv'
+ignored_qtypes = ['DNSKEY', 'NS']
+
+
+
+############################################
+#        Suspicious queries logging        #
+############################################
+
+[nx_log]
+file = '/var/log/dnscrypt-nx.log'
+format = 'tsv'
+
+
+
+######################################################
+#        Pattern-based blocking (blocklists)        #
+######################################################
+
+[blocked_names]
+blocked_names_file = 'rules/block.lst.txt'
+log_file = 'blocked.log'
+log_format = 'tsv'
+
+
+
+###########################################################
+#        Pattern-based IP blocking (IP blocklists)        #
+###########################################################
+
+[blocked_ips]
+# blocked_ips_file = 'blocked-ips.txt'
+# log_file = 'blocked-ips.log'
+# log_format = 'tsv'
+
+
+
+######################################################
+#   Pattern-based allow lists (blocklists bypass)   #
+######################################################
+
+[allowed_names]
+# allowed_names_file = 'allowed-names.txt'
+# log_file = 'allowed-names.log'
+# log_format = 'tsv'
+
+
+
+#########################################################
+#   Pattern-based allowed IPs lists (blocklists bypass) #
+#########################################################
+
+[allowed_ips]
+# allowed_ips_file = 'allowed-ips.txt'
+# log_file = 'allowed-ips.log'
+# log_format = 'tsv'
+
+
+
+#########################
+#        Servers        #
+#########################
+
+[sources]
+
+## An example of a remote source from https://github.com/DNSCrypt/dnscrypt-resolvers
+
+[sources.'public-resolvers']
+urls = [
+    'https://raw.githubusercontent.com/DNSCrypt/dnscrypt-resolvers/master/v3/public-resolvers.md',
+    'https://download.dnscrypt.info/resolvers-list/v3/public-resolvers.md',
+    'https://ipv6.download.dnscrypt.info/resolvers-list/v3/public-resolvers.md',
+    'https://download.dnscrypt.net/resolvers-list/v3/public-resolvers.md'
+]
+cache_file = 'public-resolvers.md'
+minisign_key = 'RWQf6LRCGA9i53mlYecO4IzT51TGPpvWucNSCh1CBM0QTaLn73Y7GFO3'
+refresh_delay = 72
+prefix = ''
+
+## Anonymized DNS relays
+
+[sources.'relays']
+urls = ['https://raw.githubusercontent.com/DNSCrypt/dnscrypt-resolvers/master/v3/relays.md', 'https://download.dnscrypt.info/resolvers-list/v3/relays.md', 'https://ipv6.download.dnscrypt.info/resolvers-list/v3/relays.md', 'https://download.dnscrypt.net/resolvers-list/v3/relays.md']
+cache_file = 'relays.md'
+minisign_key = 'RWQf6LRCGA9i53mlYecO4IzT51TGPpvWucNSCh1CBM0QTaLn73Y7GFO3'
+refresh_delay = 72
+prefix = ''
+
+
+
+#########################################
+#        Servers with known bugs        #
+#########################################
+
+[broken_implementations]
+fragments_blocked = [
+    # 'cisco',
+    # 'cisco-ipv6',
+    # 'cisco-familyshield',
+    # 'cisco-familyshield-ipv6',
+    # 'cleanbrowsing-adult',
+    # 'cleanbrowsing-adult-ipv6',
+    # 'cleanbrowsing-family',
+    # 'cleanbrowsing-family-ipv6',
+    # 'cleanbrowsing-security',
+    # 'cleanbrowsing-security-ipv6'
+]
+
+
+
+#################################################################
+#        Certificate-based client authentication for DoH        #
+#################################################################
+
+[doh_client_x509_auth]
+# creds = [
+#    { server_name='myserver', client_cert='client.crt', client_key='client.key' }
+# ]
+
+
+
+################################
+#        Anonymized DNS        #
+################################
+
+[anonymized_dns]
+skip_incompatible = false
+# direct_cert_fallback = false
+
+
+
+########################################
+#            Static entries            #
+########################################
+
+[static]
+#
+#    [static.'cloudflare']
+#    stamp = 'sdns://AgcAAAAAAAAABzEuMC4wLjEAEmRucy5jbG91ZGZsYXJlLmNvbQovZG5zLXF1ZXJ5'
+#    [static.'nextdns']
+#    stamp = 'sdns://AgcAAAAAAAAACjQ1LjkwLjI4LjCgMob_ZaZfrzIIXuoTiMNzi6fjeHPJBszjxKKLTMKliYigRE69Z7uD-IB7OSHpOKyReLiCvVCq2xEjHwRM9fCN984gzBBg05yDKbYrb7x9DW35MJhpuYHn5jktXNj6QI9NgOYOZG5zLm5leHRkbnMuaW8PL2Ruc2NyeXB0LXByb3h5'
