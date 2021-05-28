@@ -140,8 +140,7 @@ log_files_max_backups = 1
 #########################
 #        Filters        #
 #########################
-
-block_ipv6 = false
+block_ipv6 = true
 block_unqualified = true
 block_undelegated = true
 reject_ttl = 1800
@@ -151,7 +150,6 @@ reject_ttl = 1800
 ##################################################################################
 #        Route queries for specific domains to a dedicated set of servers        #
 ##################################################################################
-
 forwarding_rules = 'rules/forward.lst.txt'
 
 
@@ -159,7 +157,6 @@ forwarding_rules = 'rules/forward.lst.txt'
 ###############################
 #        Cloaking rules       #
 ###############################
-
 # cloaking_rules = 'cloaking-rules.txt'
 # cloak_ttl = 600
 
@@ -168,7 +165,6 @@ forwarding_rules = 'rules/forward.lst.txt'
 ###########################
 #        DNS cache        #
 ###########################
-
 cache = true
 cache_size = 30000
 cache_min_ttl = 3600
@@ -181,7 +177,6 @@ cache_neg_max_ttl = 3600
 ########################################
 #        Captive portal handling       #
 ########################################
-
 [captive_portals]
 # map_file = 'example-captive-portals.txt'
 
@@ -190,7 +185,6 @@ cache_neg_max_ttl = 3600
 ###############################
 #        Query logging        #
 ###############################
-
 [query_log]
 file = '/var/log/dnscrypt-query.log'
 format = 'tsv'
@@ -201,7 +195,6 @@ ignored_qtypes = ['DNSKEY', 'NS']
 ############################################
 #        Suspicious queries logging        #
 ############################################
-
 [nx_log]
 file = '/var/log/dnscrypt-nx.log'
 format = 'tsv'
@@ -211,7 +204,6 @@ format = 'tsv'
 ######################################################
 #        Pattern-based blocking (blocklists)        #
 ######################################################
-
 [blocked_names]
 blocked_names_file = 'rules/block.lst.txt'
 log_file = 'blocked.log'
@@ -222,7 +214,6 @@ log_format = 'tsv'
 ###########################################################
 #        Pattern-based IP blocking (IP blocklists)        #
 ###########################################################
-
 [blocked_ips]
 # blocked_ips_file = 'blocked-ips.txt'
 # log_file = 'blocked-ips.log'
@@ -233,7 +224,6 @@ log_format = 'tsv'
 ######################################################
 #   Pattern-based allow lists (blocklists bypass)   #
 ######################################################
-
 [allowed_names]
 # allowed_names_file = 'allowed-names.txt'
 # log_file = 'allowed-names.log'
@@ -244,7 +234,6 @@ log_format = 'tsv'
 #########################################################
 #   Pattern-based allowed IPs lists (blocklists bypass) #
 #########################################################
-
 [allowed_ips]
 # allowed_ips_file = 'allowed-ips.txt'
 # log_file = 'allowed-ips.log'
@@ -255,7 +244,6 @@ log_format = 'tsv'
 #########################
 #        Servers        #
 #########################
-
 [sources]
 
 ## An example of a remote source from https://github.com/DNSCrypt/dnscrypt-resolvers
@@ -286,7 +274,6 @@ prefix = ''
 #########################################
 #        Servers with known bugs        #
 #########################################
-
 [broken_implementations]
 fragments_blocked = [
     # 'cisco',
@@ -306,7 +293,6 @@ fragments_blocked = [
 #################################################################
 #        Certificate-based client authentication for DoH        #
 #################################################################
-
 [doh_client_x509_auth]
 # creds = [
 #    { server_name='myserver', client_cert='client.crt', client_key='client.key' }
@@ -317,7 +303,6 @@ fragments_blocked = [
 ################################
 #        Anonymized DNS        #
 ################################
-
 [anonymized_dns]
 skip_incompatible = false
 # direct_cert_fallback = false
@@ -327,7 +312,6 @@ skip_incompatible = false
 ########################################
 #            Static entries            #
 ########################################
-
 [static]
 #
 #    [static.'cloudflare']
