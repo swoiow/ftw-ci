@@ -1,4 +1,4 @@
-TRAVIS_BUILD_DIR := $(PWD)
+BUILDER_DIR := $(PWD)
 
 build-ss:
 	python build.py
@@ -7,7 +7,7 @@ docker-login:
 	echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin
 
 build-v2ray:
-	docker build -t v2ray -f ${TRAVIS_BUILD_DIR}/v2ray/Dockerfile --pull --no-cache --compress .
+	docker build -t v2ray -f ${BUILDER_DIR}/v2ray/Dockerfile --pull --no-cache --compress .
 
 push-v2ray:
 	docker tag v2ray ${DOCKER_USERNAME}/v2ray
@@ -16,7 +16,7 @@ push-v2ray:
 build-net:
 	docker build \
 		-t ${DOCKER_USERNAME}/net \
-		-f ${TRAVIS_BUILD_DIR}/vendors/net/Dockerfile \
+		-f ${BUILDER_DIR}/vendors/net/Dockerfile \
 		--no-cache --compress .
 
 push-net:
@@ -25,11 +25,11 @@ push-net:
 build-base:
 	docker build \
 		-t golang-env:0.1 \
-		-f ${TRAVIS_BUILD_DIR}/vendors/golang/Dockerfile \
+		-f ${BUILDER_DIR}/vendors/golang/Dockerfile \
 		--pull --no-cache --compress .
 
 build-v2fly: build-base
 	docker build \
 		-t v2fly-dist \
-		-f ${TRAVIS_BUILD_DIR}/vendors/v2fly/Dockerfile \
+		-f ${BUILDER_DIR}/vendors/v2fly/Dockerfile \
 		--no-cache --compress .

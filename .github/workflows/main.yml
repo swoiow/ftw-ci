@@ -1,0 +1,53 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Build
+
+# Controls when the action will run.
+on:
+  # Triggers the workflow on push or pull request events but only for the master branch
+  push:
+    branches: [ master ]
+
+  schedule:
+    - cron: "* */12 * * *"
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      - name: docker-login
+        run: make docker-login
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: build-v2fly
+        run: make build-v2fly
+        env:
+          USR: ${{ secrets.USR }}
+          BUILDER_DIR: $GITHUB_WORKSPACE
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+
+      - name: build-push
+        run: make build-net push-net
+        env:
+          USR: ${{ secrets.USR }}
+          BUILDER_DIR: $GITHUB_WORKSPACE
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+
+      - name: list-images
+        run: docker images
+
+      - name: docker-logout
+        run: docker logout
