@@ -1,5 +1,5 @@
 ##################################
-#         Global settings        #
+#     Global settings    #
 ##################################
 ## Servers from the "public-resolvers" source (see down below) can
 ## be viewed here: https://dnscrypt.info/public-servers
@@ -11,14 +11,11 @@ server_names = [
     "google",
     'nextdns',
     'quad101',
-    #    'quad9-dnscrypt-ip4-filter-pri',
-    #    'jp.tiar.app',
-    #    'adguard-dns'
 ]
 
-listen_addresses = ['127.0.0.1:15353']
+listen_addresses = ['127.0.0.1:53']
 ## Maximum number of simultaneous client connections to accept
-max_clients = 100
+max_clients = 200
 #user_name = 'nobody'
 
 ## Require servers (from static + remote sources) to satisfy specific properties
@@ -51,9 +48,6 @@ edns_client_subnet = [
     # GZ
     "14.119.113.22/32",
     "139.159.208.89/32",
-    # HK
-    #    "119.28.80.58/32",
-    #    "159.138.16.98/32"
 ]
 
 ## Response for blocked queries. Options are `refused`, `hinfo` (default) or
@@ -80,7 +74,7 @@ lb_estimator = true
 #log_file = '/var/log/dnscrypt-proxy.log'
 # log_file_latest = true
 # use_syslog = true
-cert_refresh_delay = 240
+cert_refresh_delay = 300
 
 ## DNSCrypt: Create a new, unique key for every single DNS query
 ## This may improve privacy but can also have a significant impact on CPU usage
@@ -122,31 +116,23 @@ log_files_max_age = 3
 log_files_max_backups = 1
 
 
-#########################
-#        Filters        #
-#########################
+#    Filters
 block_ipv6 = true
 block_unqualified = true
 block_undelegated = true
 reject_ttl = 1800
 
 
-##################################################################################
-#        Route queries for specific domains to a dedicated set of servers        #
-##################################################################################
+#    Route queries for specific domains to a dedicated set of servers
 forwarding_rules = 'rules/forward.lst.txt'
 
 
-###############################
-#        Cloaking rules       #
-###############################
-# cloaking_rules = 'rules/cloaking.lst.txt'
-# cloak_ttl = 600
+#    Cloaking rules
+cloaking_rules = 'rules/cloaking.lst.txt'
+cloak_ttl = 600
 
 
-###########################
-#        DNS cache        #
-###########################
+#    DNS cache
 cache = true
 cache_size = 30000
 cache_min_ttl = 3600
@@ -159,14 +145,14 @@ cache_neg_max_ttl = 3600
 #        Captive portal handling       #
 ########################################
 [captive_portals]
-# map_file = 'example-captive-portals.txt'
+map_file = 'rules/captive-portals.txt'
 
 
 ###############################
 #        Query logging        #
 ###############################
 [query_log]
-file = '/var/log/dnscrypt-query.log'
+file = 'dnscrypt-query.log'
 format = 'tsv'
 ignored_qtypes = ['DNSKEY', 'NS']
 
@@ -175,7 +161,7 @@ ignored_qtypes = ['DNSKEY', 'NS']
 #        Suspicious queries logging        #
 ############################################
 [nx_log]
-file = '/var/log/dnscrypt-nx.log'
+file = 'dnscrypt-nx.log'
 format = 'tsv'
 
 
@@ -192,7 +178,7 @@ log_format = 'tsv'
 #        Pattern-based IP blocking (IP blocklists)        #
 ###########################################################
 [blocked_ips]
-# blocked_ips_file = 'blocked-ips.txt'
+ blocked_ips_file = 'rules/blocked-ips.lst.txt'
 # log_file = 'blocked-ips.log'
 # log_format = 'tsv'
 
@@ -219,22 +205,32 @@ log_format = 'tsv'
 #        Servers        #
 #########################
 [sources]
+
 ## An example of a remote source from https://github.com/DNSCrypt/dnscrypt-resolvers
 [sources.'public-resolvers']
 urls = [
     'https://raw.githubusercontent.com/DNSCrypt/dnscrypt-resolvers/master/v3/public-resolvers.md',
     'https://download.dnscrypt.info/resolvers-list/v3/public-resolvers.md',
-    'https://ipv6.download.dnscrypt.info/resolvers-list/v3/public-resolvers.md',
-    'https://download.dnscrypt.net/resolvers-list/v3/public-resolvers.md'
 ]
 cache_file = 'rules/public-resolvers.md'
 minisign_key = 'RWQf6LRCGA9i53mlYecO4IzT51TGPpvWucNSCh1CBM0QTaLn73Y7GFO3'
 refresh_delay = 72
 prefix = ''
 
+#[sources.'odoh']
+#urls = [
+#    'https://raw.githubusercontent.com/DNSCrypt/dnscrypt-resolvers/master/v3/odoh.md',
+#    'https://download.dnscrypt.info/resolvers-list/v3/odoh.md'
+#]
+#minisign_key = 'RWQf6LRCGA9i53mlYecO4IzT51TGPpvWucNSCh1CBM0QTaLn73Y7GFO3'
+#cache_file = 'rules/odoh.md'
+
 ## Anonymized DNS relays
 [sources.'relays']
-urls = ['https://raw.githubusercontent.com/DNSCrypt/dnscrypt-resolvers/master/v3/relays.md', 'https://download.dnscrypt.info/resolvers-list/v3/relays.md', 'https://ipv6.download.dnscrypt.info/resolvers-list/v3/relays.md', 'https://download.dnscrypt.net/resolvers-list/v3/relays.md']
+urls = [
+    'https://raw.githubusercontent.com/DNSCrypt/dnscrypt-resolvers/master/v3/relays.md',
+    'https://download.dnscrypt.info/resolvers-list/v3/relays.md',
+]
 cache_file = 'rules/relays.md'
 minisign_key = 'RWQf6LRCGA9i53mlYecO4IzT51TGPpvWucNSCh1CBM0QTaLn73Y7GFO3'
 refresh_delay = 72
@@ -273,9 +269,11 @@ fragments_blocked = [
 ################################
 [anonymized_dns]
 # Skip resolvers incompatible with anonymization instead of using them directly
-skip_incompatible = false
+skip_incompatible = true
 # direct_cert_fallback = false
-
+#routes = [
+#    { server_name='*', via=['odoh-cloudflare', 'odoh-id-gmail'] }
+#]
 
 ########################################
 #            Static entries            #

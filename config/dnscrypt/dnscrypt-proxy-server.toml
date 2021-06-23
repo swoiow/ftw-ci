@@ -59,17 +59,14 @@ lb_estimator = true
 ## Delay, in minutes, after which certificates are reloaded
 cert_refresh_delay = 240
 
-
 ## Fallback resolvers
 fallback_resolvers = [
     '1.1.1.1:53',
     '8.8.8.8:53'
 ]
 
-
 ## Always use the fallback resolver before the system DNS settings.
 ignore_system_dns = true
-
 
 ## Maximum time (in seconds) to wait for network connectivity before
 ## initializing the proxy.
@@ -79,7 +76,6 @@ ignore_system_dns = true
 ## and -1 to wait as much as possible.
 netprobe_timeout = 30
 netprobe_address = '1.1.1.1:5353'
-
 
 ## Automatic log files rotation
 log_files_max_size = 3
@@ -94,7 +90,6 @@ block_ipv6 = true
 block_unqualified = true
 block_undelegated = true
 reject_ttl = 600
-
 
 ## Enable a DNS cache to reduce latency and outgoing traffic
 cache = true
@@ -119,22 +114,22 @@ format = 'tsv'
 #        Servers        #
 #########################
 [sources]
-
 [sources.'public-resolvers']
 urls = [
     'https://raw.githubusercontent.com/DNSCrypt/dnscrypt-resolvers/master/v3/public-resolvers.md',
-    'https://download.dnscrypt.info/resolvers-list/v3/public-resolvers.md',
-    'https://ipv6.download.dnscrypt.info/resolvers-list/v3/public-resolvers.md',
-    'https://download.dnscrypt.net/resolvers-list/v3/public-resolvers.md'
+    'https://download.dnscrypt.info/resolvers-list/v3/public-resolvers.md'
 ]
-cache_file = 'public-resolvers.md'
+cache_file = 'rules/public-resolvers.md'
 minisign_key = 'RWQf6LRCGA9i53mlYecO4IzT51TGPpvWucNSCh1CBM0QTaLn73Y7GFO3'
 refresh_delay = 72
 prefix = ''
 
 [sources.'relays']
-urls = ['https://raw.githubusercontent.com/DNSCrypt/dnscrypt-resolvers/master/v3/relays.md', 'https://download.dnscrypt.info/resolvers-list/v3/relays.md', 'https://ipv6.download.dnscrypt.info/resolvers-list/v3/relays.md', 'https://download.dnscrypt.net/resolvers-list/v3/relays.md']
-cache_file = 'relays.md'
+urls = [
+    'https://raw.githubusercontent.com/DNSCrypt/dnscrypt-resolvers/master/v3/relays.md',
+    'https://download.dnscrypt.info/resolvers-list/v3/relays.md'
+]
+cache_file = 'rules/relays.md'
 minisign_key = 'RWQf6LRCGA9i53mlYecO4IzT51TGPpvWucNSCh1CBM0QTaLn73Y7GFO3'
 refresh_delay = 72
 prefix = ''
