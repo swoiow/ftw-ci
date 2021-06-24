@@ -1,3 +1,4 @@
+##    Global settings
 server_names = [
     "cloudflare",
     "nextdns",
@@ -7,7 +8,7 @@ server_names = [
 listen_addresses = ['127.0.0.1:53']
 
 ## Maximum number of simultaneous client connections to accept
-max_clients = 250
+max_clients = 300
 user_name = 'nobody'
 
 ## Require servers (from static + remote sources) to satisfy specific properties
@@ -17,8 +18,8 @@ dnscrypt_servers = true
 doh_servers = true
 
 ## Require servers defined by remote sources to satisfy specific properties
-require_dnssec = false
-require_nolog = false
+require_dnssec = true
+require_nolog = true
 require_nofilter = false
 disabled_server_names = []
 force_tcp = true
@@ -82,10 +83,7 @@ log_files_max_size = 3
 log_files_max_age = 3
 log_files_max_backups = 1
 
-
-#########################
-#        Filters        #
-#########################
+##    Filters
 block_ipv6 = true
 block_unqualified = true
 block_undelegated = true
