@@ -5,7 +5,7 @@ server_names = [
     "quad9-dnscrypt-ip4-nofilter-pri",
 ]
 
-listen_addresses = ['127.0.0.1:53']
+listen_addresses = ['0.0.0.0:53']
 
 ## Maximum number of simultaneous client connections to accept
 max_clients = 300
@@ -62,7 +62,8 @@ cert_refresh_delay = 240
 
 ## Fallback resolvers
 fallback_resolvers = [
-    '1.1.1.1:53',
+    '1.1.1.3:53',
+    '9.9.9.9:53',
     '8.8.8.8:53'
 ]
 
