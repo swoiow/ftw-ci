@@ -6,10 +6,10 @@ name: Build
 on:
   # Triggers the workflow on push or pull request events but only for the master branch
   push:
-    branches: [ master ]
+    branches: [ main ]
 
   schedule:
-    - cron: "45 */12 * * *"
+    - cron: "45 2,14 * * *"
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -26,28 +26,40 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
-      - name: docker-login
+      - name: docker login
         run: make docker-login
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: build-v2fly
+      - name: build environments
+        run: make prepare-environments
+        env:
+          BUILDER_DIR: $GITHUB_WORKSPACE
+
+      - name: build v2fly
         run: make build-v2fly
         env:
           USR: ${{ secrets.USR }}
           BUILDER_DIR: $GITHUB_WORKSPACE
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
 
-      - name: build-push
+      - name: build push net
         run: make build-net push-net
         env:
           USR: ${{ secrets.USR }}
           BUILDER_DIR: $GITHUB_WORKSPACE
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
 
-      - name: list-images
+      - name: build push dnscrypt
+        run: make build-dnscrypt push-dnscrypt
+        env:
+          USR: ${{ secrets.USR }}
+          BUILDER_DIR: $GITHUB_WORKSPACE
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+
+      - name: list images
         run: docker images
 
-      - name: docker-logout
+      - name: docker logout
         run: docker logout
