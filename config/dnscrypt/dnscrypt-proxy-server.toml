@@ -98,10 +98,10 @@ reject_ttl = 600
 ## Enable a DNS cache to reduce latency and outgoing traffic
 cache = true
 cache_size = 30000
-cache_min_ttl = 3600
-cache_max_ttl = 86400
-cache_neg_min_ttl = 3600
-cache_neg_max_ttl = 3600
+cache_min_ttl = 800
+cache_max_ttl = 3600
+cache_neg_min_ttl = 60
+cache_neg_max_ttl = 600
 
 ## Log client queries to a file
 [query_log]
