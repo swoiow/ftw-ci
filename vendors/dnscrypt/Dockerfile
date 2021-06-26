@@ -21,7 +21,10 @@ ENV TZ=Asia/Shanghai
 WORKDIR /opt/app
 COPY --from=builder /app/dnscrypt-proxy /usr/bin/
 COPY config/dnscrypt/dnscrypt-proxy-server.toml /opt/app/dnscrypt-proxy.toml
-RUN mkdir -p /opt/app/rules
+RUN mkdir -p /opt/app/rules && \
+    touch /var/log/dnscrypt-query.log && \
+    chown nobody -R /opt/app && \
+    chown nobody /var/log/dnscrypt-query.log
 
 ENTRYPOINT ["dumb-init", "--"]
 CMD ["dnscrypt-proxy", "-config", "/opt/app/dnscrypt-proxy.toml"]

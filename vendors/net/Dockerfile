@@ -14,7 +14,7 @@ RUN set -x && \
     ./upx --lzma -9 -f -o /dist/v2ctl /app/v2ctl
 
 # Make package
-FROM debian:10-slim
+FROM runtime-debian:stable-slim
 LABEL App=Net-tools
 
 ENV TZ=Asia/Shanghai \
@@ -24,16 +24,9 @@ ENV TZ=Asia/Shanghai \
 ARG GEOIP_URL=https://github.com/Loyalsoldier/geoip/raw/release/geoip.dat
 ARG GEOSITE_URL=https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geosite.dat
 
-ADD https://github.com/Yelp/dumb-init/releases/download/v1.2.2/dumb-init_1.2.2_amd64 /usr/bin/dumb-init
-RUN chmod +x /usr/bin/dumb-init
-
 ADD https://github.com/v2ray/ext/raw/master/docker/official/config.json ${V2RAY_LOCATION_CONFIG}/config.json
 COPY --from=upx /dist/* /usr/bin/
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends ca-certificates && \
-    rm -rf /root/.cache /tmp/* /var/lib/apt/* /var/cache/* /var/log/* && \
-    update-ca-certificates && \
-    ln -s /usr/bin/net /usr/bin/v2ray && \
+RUN ln -s /usr/bin/net /usr/bin/v2ray && \
     ln -s /etc/net /etc/v2ray
 
 ADD ${GEOIP_URL} ${V2RAY_LOCATION_ASSET}/geoip.dat

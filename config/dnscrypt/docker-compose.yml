@@ -1,0 +1,39 @@
+version: "3.8"
+
+services:
+  inside:
+    image: pylab/dnscrypt-proxy
+    container_name: dnscrypt-inside
+
+    volumes:
+      - "/etc/dnscrypt/dnscrypt-proxy-inside.toml:/opt/app/dnscrypt-proxy.toml:ro"
+      - type: bind
+        source: /var/log/dnscrypt-query-inside.log
+        target: /var/log/dnscrypt-query.log
+
+    ports:
+      - "127.0.0.1:153:53/udp"
+
+    restart: unless-stopped
+    shm_size: 32M
+    sysctls:
+      - net.core.somaxconn=1024
+
+
+  outside:
+    image: pylab/dnscrypt-proxy
+    container_name: dnscrypt-outside
+
+    volumes:
+      - "/etc/dnscrypt/dnscrypt-proxy-outside.toml:/opt/app/dnscrypt-proxy.toml:ro"
+      - type: bind
+        source: /var/log/dnscrypt-query-outside.log
+        target: /var/log/dnscrypt-query.log
+
+    ports:
+      - "127.0.0.1:53:53/udp"
+
+    restart: unless-stopped
+    shm_size: 32M
+    sysctls:
+      - net.core.somaxconn=1024

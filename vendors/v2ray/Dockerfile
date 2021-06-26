@@ -28,19 +28,10 @@ RUN tar --strip-components=1 -xf upx-3.96-amd64_linux.tar.xz && \
     ./upx --brute /app/v2ctl
 
 # Make package
-FROM alpine
-
+FROM runtime-alpine
 LABEL App=Net-tool-V
 
 ENV TZ=Asia/Shanghai
-ADD https://github.com/Yelp/dumb-init/releases/download/v1.2.2/dumb-init_1.2.2_amd64 /usr/bin/dumb-init
-RUN chmod +x /usr/bin/dumb-init
-
-RUN apk update && \
-    apk upgrade && \
-    apk add ca-certificates && update-ca-certificates && \
-    apk add --update tzdata && \
-    rm -rf /var/cache/apk/*
 
 ADD https://github.com/v2ray/ext/raw/master/docker/official/config.json /etc/net/config.json
 COPY --from=upx /app/v2ray /usr/bin/net
