@@ -18,6 +18,14 @@ services:
     shm_size: 32M
     sysctls:
       - net.core.somaxconn=1024
+      - net.ipv4.tcp_fin_timeout=45
+      - net.ipv4.tcp_keepalive_time=1200
+      - net.ipv4.tcp_syncookies=1
+    ulimits:
+      nproc: 60000
+      nofile:
+        soft: 20000
+        hard: 40000
 
 
   outside:
@@ -37,3 +45,11 @@ services:
     shm_size: 32M
     sysctls:
       - net.core.somaxconn=1024
+      - net.ipv4.tcp_fin_timeout=45
+      - net.ipv4.tcp_keepalive_time=1200
+      - net.ipv4.tcp_syncookies=1
+    ulimits:
+      nproc: 60000
+      nofile:
+        soft: 20000
+        hard: 40000
