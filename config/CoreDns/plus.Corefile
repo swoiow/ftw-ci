@@ -1,0 +1,86 @@
+# https://fuckcloudnative.io/posts/install-coredns-on-macos/#span-idinline-toc1span-corefile-%E4%BB%8B%E7%BB%8D
+
+(global_cache) {
+    cache {
+        # [5, 60]
+        success 65536 3600 300
+        # [1, 10]
+        denial 8192 600 60
+        prefetch 1 60m 10%
+    }
+}
+
+.:53  {
+    import global_cache
+    errors
+#    rewrite stop type AAAA A
+#    loop
+#    health
+
+    log . "{remote} {type} {name} {class} {size} {rcode} {duration}"
+
+#    log . {
+#        class denial error
+#    }
+
+    ads {
+        default-lists
+        disable-auto-update
+        list-store ads-cache
+#        log
+#        errors
+
+        blacklist file:///opt/dns/black.lst.conf
+        blacklist file:///opt/dns/black-default.lst.conf
+#        blacklist https://t.cn/A6zY4e4i
+#        blacklist https://raw.githubusercontent.com/privacy-protection-tools/anti-AD/master/anti-ad-domains.txt
+#        blacklist http://t.cn/A6MLgJzv
+#        blacklist https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/reject-list.txt
+#        blacklist http://t.cn/A6MLgJey
+#        blacklist https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/win-spy.txt
+#        blacklist http://t.cn/A6MLgSPt
+#        blacklist https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/win-extra.txt
+#        auto-update-interval 24h
+    }
+
+    hosts {
+        fallthrough
+    }
+
+    template ANY AAAA {
+        rcode NXDOMAIN
+    }
+
+    dnsredir cn-domains.lst {
+        fallthrough
+        expire 60s
+        health_check 900s
+        policy round_robin
+        no_ipv6
+
+        to ietf-doh://223.5.5.5/dns-query ietf-doh://223.6.6.6/dns-query
+        to ietf-doh://doh.pub/dns-query
+        bootstrap 114.114.114.114 223.5.5.5 223.6.6.6
+    }
+
+    dnsredir accelerated-domains.china.conf mydns.conf {
+        fallthrough
+        expire 60s
+        health_check 900s
+        no_ipv6
+
+        to udp://127.0.0.1:5301
+        bootstrap 223.5.5.5 223.6.6.6
+    }
+
+    dnsredir . {
+        expire 60s
+        health_check 900s
+        policy round_robin
+        spray
+        no_ipv6
+
+        to udp://127.0.0.1:5302
+        to ietf-doh://dns.google/dns-query
+    }
+}
