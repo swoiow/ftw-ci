@@ -1,12 +1,13 @@
-# Docker Images
-Cron Jobs to build images by using travis-ci.
+# Docker Images 
+[![Build](https://github.com/swoiow/ftw-ci/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/swoiow/ftw-ci/actions/workflows/main.yml)
+
+Cron Jobs to build images by GitHub Action.
 
 + ~~shadowsocks (Python version)~~
 + ~~shadowsocks-libev (C version)~~
 + V2ray (V2ray+Random+upx / ss+V2ray-plug)
 + Net (V2ray / shadowsocks-libev+V2ray-plug / kcptun)
-
-Travis CI: [![Build Status](https://travis-ci.org/swoiow/ftw-travis-ci.svg?branch=master)](https://travis-ci.org/swoiow/ftw-travis-ci)
++ dnscrypt-proxy stable version
 
 # Crontab
 ```
