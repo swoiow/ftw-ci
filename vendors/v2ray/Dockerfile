@@ -13,13 +13,8 @@ RUN latestTag=$(git describe --tags `git rev-list --tags --max-count=1`) && \
     CODENAME=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w ${1:-64} | head -n 1) && \
     BUILDNAME=$(date +%Y_%m_%d) && \
     sed -i "s/^[ \t]\+codename.\+$/\tcodename = \"${CODENAME}\"/;s/^[ \t]\+build.\+$/\tbuild = \"${BUILDNAME}\"/;" core.go
-RUN go mod edit -replace=github.com/marten-seemann/qtls-go1-17@v0.1.0=github.com/marten-seemann/qtls-go1-18@v0.1.1
-RUN go mod edit -replace=github.com/marten-seemann/qtls-go1-16@v0.1.4=github.com/marten-seemann/qtls-go1-18@v0.1.1
-RUN go mod edit -replace=github.com/lucas-clemente/quic-go@v0.23.0=github.com/lucas-clemente/quic-go@v0.26.0
-RUN go mod edit -replace=go4.org/unsafe/assume-no-moving-gc@v0.0.0-20201222180813-1025295fd063=go4.org/unsafe/assume-no-moving-gc@v0.0.0-20211027215541-db492cf91b37
-RUN go get && \
-    go build -o ./v2ray -ldflags "-s -w" -i ./main && chmod +x ./v2ray
-# RUN go build -o ./v2ctl -ldflags "-s -w" -i ./infra/control/main && chmod +x ./v2ctl
+RUN go build -o ./v2ray -ldflags "-s -w" -i ./main && chmod +x ./v2ray
+RUN go build -o ./v2ctl -ldflags "-s -w" -i ./infra/control/main && chmod +x ./v2ctl
 
 
 FROM alpine as upx
