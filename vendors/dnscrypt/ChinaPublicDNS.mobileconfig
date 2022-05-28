@@ -1,0 +1,145 @@
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+    <dict>
+        <key>PayloadContent</key>
+        <array>
+            <dict>
+                <key>DNSSettings</key>
+                <dict>
+                    <key>DNSProtocol</key>
+                    <string>HTTPS</string>
+                    <key>ServerURL</key>
+                    <string>https://doh.360.cn/dns-query</string>
+                </dict>
+                <key>OnDemandRules</key>
+                <array>
+                    <dict>
+                        <key>Action</key>
+                        <string>Connect</string>
+                    </dict>
+                </array>
+                <key>Name</key>
+                <string>DoH On 360DNS</string>
+                <key>PayloadDescription</key>
+                <string>Configures device to use DoH OnDemand.</string>
+                <key>PayloadDisplayName</key>
+                <string>360 Secure DNS</string>
+                <key>PayloadIdentifier</key>
+                <string>com.apple.dnsSettings.managed.CBD563E0-73ED-4D26-894B-F21F943AFD41</string>
+                <key>PayloadType</key>
+                <string>com.apple.dnsSettings.managed</string>
+                <key>PayloadUUID</key>
+                <string>CBD563E0-73ED-4D26-894B-F21F943AFD41</string>
+                <key>PayloadVersion</key>
+                <integer>1</integer>
+            </dict>
+
+            <dict>
+                <key>DNSSettings</key>
+                <dict>
+                    <key>DNSProtocol</key>
+                    <string>HTTPS</string>
+                    <key>ServerURL</key>
+                    <string>https://dns.pub/dns-query</string>
+                </dict>
+                <key>OnDemandRules</key>
+                <array>
+                    <dict>
+                        <key>Action</key>
+                        <string>Connect</string>
+                    </dict>
+                </array>
+                <key>Name</key>
+                <string>DoH on DNSPod</string>
+                <key>PayloadDescription</key>
+                <string>Configures device to use DoH OnDemand.</string>
+                <key>PayloadDisplayName</key>
+                <string>DNSPod Public DNS+</string>
+                <key>PayloadIdentifier</key>
+                <string>com.apple.dnsSettings.managed.1F428F6A-62FF-447D-82A8-8676DFE7898E</string>
+                <key>PayloadType</key>
+                <string>com.apple.dnsSettings.managed</string>
+                <key>PayloadUUID</key>
+                <string>1F428F6A-62FF-447D-82A8-8676DFE7898E</string>
+                <key>PayloadVersion</key>
+                <integer>1</integer>
+            </dict>
+
+            <dict>
+                <key>DNSSettings</key>
+                <dict>
+                    <key>DNSProtocol</key>
+                    <string>HTTPS</string>
+                    <key>ServerURL</key>
+                    <string>https://dns.alidns.com/dns-query</string>
+                </dict>
+                <key>OnDemandRules</key>
+                <array>
+                    <dict>
+                        <key>Action</key>
+                        <string>Connect</string>
+                    </dict>
+                </array>
+                <key>Name</key>
+                <string>DoH On AliDNS</string>
+                <key>PayloadDescription</key>
+                <string>Configures device to use DoH OnDemand.</string>
+                <key>PayloadDisplayName</key>
+                <string>Ali DNS</string>
+                <key>PayloadIdentifier</key>
+                <string>com.apple.dnsSettings.managed.A0A52F8E-0E7B-4FFE-9F70-FEFE451C04F4</string>
+                <key>PayloadType</key>
+                <string>com.apple.dnsSettings.managed</string>
+                <key>PayloadUUID</key>
+                <string>A0A52F8E-0E7B-4FFE-9F70-FEFE451C04F4</string>
+                <key>PayloadVersion</key>
+                <integer>1</integer>
+            </dict>
+
+            <dict>
+                <key>DNSSettings</key>
+                <dict>
+                    <key>DNSProtocol</key>
+                    <string>HTTPS</string>
+                    <key>ServerURL</key>
+                    <string>https://dns.adguard.com/dns-query</string>
+                </dict>
+                <key>OnDemandRules</key>
+                <array>
+                    <dict>
+                        <key>Action</key>
+                        <string>Connect</string>
+                    </dict>
+                </array>
+                <key>Name</key>
+                <string>DoH On AdGuard</string>
+                <key>PayloadDescription</key>
+                <string>Configures device to use DoH OnDemand.</string>
+                <key>PayloadDisplayName</key>
+                <string>AdGuard DNS</string>
+                <key>PayloadIdentifier</key>
+                <string>com.apple.dnsSettings.managed.BAACD0AD-D38A-4FD6-AF6D-D57878228028</string>
+                <key>PayloadType</key>
+                <string>com.apple.dnsSettings.managed</string>
+                <key>PayloadUUID</key>
+                <string>BAACD0AD-D38A-4FD6-AF6D-D57878228028</string>
+                <key>PayloadVersion</key>
+                <integer>1</integer>
+            </dict>
+        </array>
+        <key>PayloadDescription</key>
+        <string>Adds DoH OnDemand to Big Sur and iOS 14 or newer systems</string>
+        <key>PayloadDisplayName</key>
+        <string>ChinaPublic DOH</string>
+        <key>PayloadIdentifier</key>
+        <string>5F4FFD0B-8F48-4E03-9BC9-16F49EECCE3B</string>
+        <key>PayloadRemovalDisallowed</key>
+        <false/>
+        <key>PayloadType</key>
+        <string>Configuration</string>
+        <key>PayloadUUID</key>
+        <string>7CD45D42-B648-4D71-BAF3-DBC970E901AA</string>
+        <key>PayloadVersion</key>
+        <integer>1</integer>
+    </dict>
+</plist>
