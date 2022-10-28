@@ -14,4 +14,4 @@ RUN stableTag=$(gr $REPO) && \
     BUILDNAME=$(date +%Y_%m_%d) && \
     sed -i "s/^[ \t]\+codename.\+$/\tcodename = \"${CODENAME}\"/;s/^[ \t]\+build.\+$/\tbuild = \"${BUILDNAME}\"/;" core.go
 RUN go build -o ./v2ray -ldflags "-s -w" -i ./main && chmod +x ./v2ray
-RUN go build -o ./v2ctl -ldflags "-s -w" -i ./infra/control/main && chmod +x ./v2ctl
+# RUN go build -o ./v2ctl -ldflags "-s -w" -i ./infra/control/main && chmod +x ./v2ctl
