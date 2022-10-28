@@ -6,12 +6,10 @@ FROM alpine as upx
 WORKDIR /app
 ADD https://github.com/upx/upx/releases/download/v3.96/upx-3.96-amd64_linux.tar.xz /app/
 COPY --from=v2ray /app/v2ray /app/net
-COPY --from=v2ray /app/v2ctl /app/v2ctl
 RUN set -x && \
     mkdir -p /dist && \
     tar --strip-components=1 -xf upx-3.96-amd64_linux.tar.xz && \
     ./upx --lzma -9 -f -o /dist/net /app/net && \
-    ./upx --lzma -9 -f -o /dist/v2ctl /app/v2ctl
 
 # Make package
 FROM runtime-debian:stable-slim
