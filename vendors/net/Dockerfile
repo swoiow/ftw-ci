@@ -9,7 +9,7 @@ COPY --from=v2ray /app/v2ray /app/net
 RUN set -x && \
     mkdir -p /dist && \
     tar --strip-components=1 -xf upx-3.96-amd64_linux.tar.xz && \
-    ./upx --lzma -9 -f -o /dist/net /app/net && \
+    ./upx --lzma -9 -f -o /dist/net /app/net
 
 # Make package
 FROM runtime-debian:stable-slim
