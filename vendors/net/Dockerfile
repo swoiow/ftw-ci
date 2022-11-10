@@ -1,11 +1,11 @@
 # Import bin
-FROM v2fly-dist as v2ray
+FROM v2fly-dist as dist
 
 # Make minifily
 FROM alpine as upx
 WORKDIR /app
 ADD https://github.com/upx/upx/releases/download/v3.96/upx-3.96-amd64_linux.tar.xz /app/
-COPY --from=v2ray /app/v2ray /app/net
+COPY --from=dist /app/v2ray /app/net
 RUN set -x && \
     mkdir -p /dist && \
     tar --strip-components=1 -xf upx-3.96-amd64_linux.tar.xz && \
