@@ -51,12 +51,12 @@ jobs:
           BUILDER_DIR: $GITHUB_WORKSPACE
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
 
-      - name: build push dnscrypt
-        run: make build-dnscrypt push-dnscrypt
-        env:
-          USR: ${{ secrets.USR }}
-          BUILDER_DIR: $GITHUB_WORKSPACE
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+#      - name: build push dnscrypt
+#        run: make build-dnscrypt push-dnscrypt
+#        env:
+#          USR: ${{ secrets.USR }}
+#          BUILDER_DIR: $GITHUB_WORKSPACE
+#          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
 
       - name: list images
         run: docker images
