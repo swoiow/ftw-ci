@@ -4,11 +4,11 @@ FROM v2fly-dist as dist
 # Make minifily
 FROM alpine as upx
 WORKDIR /app
-ADD https://github.com/upx/upx/releases/download/v3.96/upx-3.96-amd64_linux.tar.xz /app/
+ADD https://github.com/upx/upx/releases/download/v4.2.2/upx-4.2.2-amd64_linux.tar.xz /app/
 COPY --from=dist /app/v2ray /app/net
 RUN set -x && \
     mkdir -p /dist && \
-    tar --strip-components=1 -xf upx-3.96-amd64_linux.tar.xz && \
+    tar --strip-components=1 -xf upx-4.2.2-amd64_linux.tar.xz && \
     ./upx --lzma -9 -f -o /dist/net /app/net
 
 # Make package
