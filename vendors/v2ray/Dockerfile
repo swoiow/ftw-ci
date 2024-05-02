@@ -14,18 +14,17 @@ RUN latestTag=$(git describe --tags `git rev-list --tags --max-count=1`) && \
     BUILDNAME=$(date +%Y_%m_%d) && \
     sed -i "s/^[ \t]\+codename.\+$/\tcodename = \"${CODENAME}\"/;s/^[ \t]\+build.\+$/\tbuild = \"${BUILDNAME}\"/;" core.go
 RUN go build -o ./v2ray -ldflags "-s -w" -i ./main && chmod +x ./v2ray
-RUN go build -o ./v2ctl -ldflags "-s -w" -i ./infra/control/main && chmod +x ./v2ctl
+# RUN go build -o ./v2ctl -ldflags "-s -w" -i ./infra/control/main && chmod +x ./v2ctl
 
 
 FROM alpine as upx
 WORKDIR /app
 RUN apk add wget
 COPY --from=builder /app/v2ray /app/v2ray
-COPY --from=builder /app/v2ctl /app/v2ctl
+#COPY --from=builder /app/v2ctl /app/v2ctl
 RUN wget https://github.com/upx/upx/releases/download/v3.96/upx-3.96-amd64_linux.tar.xz
 RUN tar --strip-components=1 -xf upx-3.96-amd64_linux.tar.xz && \
-    ./upx --brute /app/v2ray && \
-    ./upx --brute /app/v2ctl
+    ./upx --brute /app/v2ray
 
 # Make package
 FROM runtime-alpine
@@ -35,13 +34,12 @@ ENV TZ=Asia/Shanghai
 
 ADD https://github.com/v2ray/ext/raw/master/docker/official/config.json /etc/net/config.json
 COPY --from=upx /app/v2ray /usr/bin/net
-COPY --from=upx /app/v2ctl /usr/bin/v2ctl
-ADD https://github.com/Ricky-Hao/geoip/releases/latest/download/geoip.dat /usr/bin/geoip.dat
-ADD https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geosite.dat /usr/bin/geosite.dat
+#COPY --from=upx /app/v2ctl /usr/bin/v2ctl
+ADD update_geo.sh /usr/bin/update_geo.sh
 
 RUN chmod 766 /usr/bin/geoip.dat /usr/bin/geosite.dat && \
     ln -s /etc/net /etc/v2ray && \
     ln -s /usr/bin/net /usr/bin/v2ray
 
-ENTRYPOINT ["dumb-init", "--"]
+ENTRYPOINT ["entrypoint.sh", "--"]
 CMD ["net", "-config=/etc/net/config.json"]

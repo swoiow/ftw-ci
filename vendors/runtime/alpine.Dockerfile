@@ -5,6 +5,6 @@ RUN chmod +x /usr/bin/dumb-init
 
 RUN apk update && \
     apk upgrade && \
-    apk add ca-certificates && update-ca-certificates && \
+    apk add ca-certificates wget && update-ca-certificates && \
     apk add --update tzdata && \
     rm -rf /var/cache/apk/*
