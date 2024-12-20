@@ -16,7 +16,7 @@ RUN set -x && \
     ./upx --lzma -9 -f -o /dist/net /app/net
 
 # Make package
-FROM runtime-debian:stable-slim
+FROM runtime-alpine
 LABEL App=Net-tools
 
 ENV TZ=Asia/Shanghai \
