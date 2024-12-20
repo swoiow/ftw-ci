@@ -1,12 +1,10 @@
-# Set build argument for UPX version
-ARG UPX_VERSION=4.2.4
-
-# Import bin
 FROM v2fly-dist as dist
 
-# Make minifily
 FROM alpine as upx
 WORKDIR /app
+
+# Set build argument for UPX version
+ARG UPX_VERSION=4.2.4
 
 # Use build-time argument for UPX version
 ADD https://github.com/upx/upx/releases/download/v${UPX_VERSION}/upx-${UPX_VERSION}-amd64_linux.tar.xz /app/
@@ -24,7 +22,7 @@ LABEL App=Net-tools
 ENV TZ=Asia/Shanghai \
     V2RAY_LOCATION_CONFIG=/etc/net \
     V2RAY_LOCATION_ASSET=/usr/data \
-    UPDATE_ASSETS=1  # Default to updating geoip.dat and geosite.dat before running
+    UPDATE_ASSETS=1
 
 ARG GEOIP_URL=https://github.com/Loyalsoldier/geoip/raw/release/geoip.dat
 ARG GEOSITE_URL=https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geosite.dat
