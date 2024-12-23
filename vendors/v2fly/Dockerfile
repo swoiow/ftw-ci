@@ -9,8 +9,13 @@ WORKDIR /app
 RUN git clone https://github.com/v2fly/v2ray-core.git /app && \
     git fetch --tags
 RUN stableTag=$(gr $REPO) && \
-    CODENAME=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w ${1:-64} | head -n 1) && \
-    BUILDNAME=$(date +%Y_%m_%d) && \
-    sed -i "s/^[ \t]\+codename.\+$/\tcodename = \"${CODENAME}\"/;s/^[ \t]\+build.\+$/\tbuild = \"${BUILDNAME}\"/;" core.go && \
-    echo stableTag
-RUN go build -o ./v2ray -ldflags "-s -w" ./main && chmod +x ./v2ray
+    CODENAME="@$(date +%Y%m%d)" && \
+    LDFLAGS="\
+        -s -w \
+        -buildid= \
+        -X github.com/v2fly/v2ray-core/v5.codename=${CODENAME} \
+        -X github.com/v2fly/v2ray-core/v5.build="" \
+        -X github.com/v2fly/v2ray-core/v5.intro="" \
+    " && \
+    echo stableTag && \
+    go build -o ./v2ray -ldflags "$LDFLAGS" ./main && chmod +x ./v2ray
