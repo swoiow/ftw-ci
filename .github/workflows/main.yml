@@ -51,6 +51,13 @@ jobs:
           BUILDER_DIR: $GITHUB_WORKSPACE
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
 
+      - name: build push hysteria
+        run: make build-hysteria push-hysteria
+        env:
+          USR: ${{ secrets.USR }}
+          BUILDER_DIR: $GITHUB_WORKSPACE
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+
 #      - name: build push dnscrypt
 #        run: make build-dnscrypt push-dnscrypt
 #        env:
