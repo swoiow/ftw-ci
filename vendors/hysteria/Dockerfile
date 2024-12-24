@@ -12,6 +12,7 @@ RUN stableTag=$(gr $REPO) && \
     CODENAME="@$(date +%Y%m%d)" && \
     LDFLAGS="\
         -s -w \
+        -X "github.com/apernet/hysteria/app/v2/cmd.appDate=${CODENAME}" \
     " && \
     echo stableTag && \
     go build -o ./hysteria -ldflags "$LDFLAGS" ./app && chmod +x ./hysteria
@@ -25,7 +26,7 @@ ENV TZ=Asia/Shanghai \
 
 WORKDIR /app
 
-COPY --from=dist /app/hysteria /app/hysteria
+COPY --from=dist /app/hysteria /usr/bin/hysteria
 
 # Entry point with option to control asset update
 ENTRYPOINT ["dumb-init", "--"]
