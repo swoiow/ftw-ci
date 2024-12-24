@@ -65,7 +65,7 @@ push-dnscrypt:
 build-hysteria:
 	docker build -t hysteria \
 	-f ${BUILDER_DIR}/vendors/hysteria/Dockerfile \
-	--pull --no-cache --compress .
+	--no-cache --compress .
 
 push-hysteria:
 	docker tag hysteria ${DOCKER_USERNAME}/hysteria
