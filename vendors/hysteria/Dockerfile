@@ -1,4 +1,4 @@
-FROM golang-env:0.1
+FROM golang-env:0.1 as dist
 
 ENV CGO_ENABLED=0 \
     GOOS=linux \
@@ -15,3 +15,19 @@ RUN stableTag=$(gr $REPO) && \
     " && \
     echo stableTag && \
     go build -o ./hysteria -ldflags "$LDFLAGS" ./app && chmod +x ./hysteria
+
+# Make package
+FROM runtime-alpine
+LABEL App=Hysteria
+
+ENV TZ=Asia/Shanghai \
+    UPDATE_ASSETS=1
+
+WORKDIR /app
+
+COPY --from=dist /app/hysteria /app/hysteria
+
+# Entry point with option to control asset update
+ENTRYPOINT ["dumb-init", "--"]
+
+CMD ["sh", "-c", "hysteria"]
