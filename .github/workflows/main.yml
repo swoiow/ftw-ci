@@ -70,3 +70,20 @@ jobs:
 
       - name: docker logout
         run: docker logout
+
+      - name: build v2fly win
+        run: |
+          make build-v2fly-win
+          docker run -i --rm -v $GITHUB_WORKSPACE/output:/opt v2fly-win cp /app/v2ray.exe /opt/net.exe
+          zip -9 $GITHUB_WORKSPACE/output/net.zip $GITHUB_WORKSPACE/output/net.exe
+
+        env:
+          USR: ${{ secrets.USR }}
+          BUILDER_DIR: $GITHUB_WORKSPACE
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+
+      - name: release win
+        uses: softprops/action-gh-release@v2
+        with:
+          prerelease: true
+          files: $GITHUB_WORKSPACE/output/net.zip

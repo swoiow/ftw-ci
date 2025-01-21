@@ -52,6 +52,12 @@ build-v2fly:
 		-f ${BUILDER_DIR}/vendors/v2fly/Dockerfile \
 		--no-cache --compress .
 
+build-v2fly-win:
+	docker build \
+		-t v2fly-win \
+		-f ${BUILDER_DIR}/vendors/v2fly/win.Dockerfile \
+		--no-cache --compress .
+
 build-dnscrypt:
 	docker build \
 		-t dnscrypt \
