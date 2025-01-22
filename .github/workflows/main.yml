@@ -74,8 +74,11 @@ jobs:
       - name: build v2fly win
         run: |
           make build-v2fly-win
+          mkdir -p $GITHUB_WORKSPACE/output
           docker run -i --rm -v $GITHUB_WORKSPACE/output:/opt v2fly-win cp /app/v2ray.exe /opt/net.exe
           zip -9 $GITHUB_WORKSPACE/output/net.zip $GITHUB_WORKSPACE/output/net.exe
+          echo $PWD
+          ls -al
 
         env:
           USR: ${{ secrets.USR }}
@@ -83,7 +86,9 @@ jobs:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
 
       - name: release win
-        uses: softprops/action-gh-release@v2
+        uses: actions/upload-artifact@v4
         with:
-          prerelease: true
-          files: $GITHUB_WORKSPACE/output/net.zip
+          retention-days: 3
+          name: net-win
+          path: |
+            $GITHUB_WORKSPACE/output
