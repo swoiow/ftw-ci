@@ -37,26 +37,26 @@ jobs:
         env:
           BUILDER_DIR: $GITHUB_WORKSPACE
 
-      - name: build v2fly
-        run: make build-v2fly
-        env:
-          USR: ${{ secrets.USR }}
-          BUILDER_DIR: $GITHUB_WORKSPACE
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+#      - name: build v2fly
+#        run: make build-v2fly
+#        env:
+#          USR: ${{ secrets.USR }}
+#          BUILDER_DIR: $GITHUB_WORKSPACE
+#          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
 
-      - name: build push net
-        run: make build-net push-net
-        env:
-          USR: ${{ secrets.USR }}
-          BUILDER_DIR: $GITHUB_WORKSPACE
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+#      - name: build push net
+#        run: make build-net push-net
+#        env:
+#          USR: ${{ secrets.USR }}
+#          BUILDER_DIR: $GITHUB_WORKSPACE
+#          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
 
-      - name: build push hysteria
-        run: make build-hysteria push-hysteria
-        env:
-          USR: ${{ secrets.USR }}
-          BUILDER_DIR: $GITHUB_WORKSPACE
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+#      - name: build push hysteria
+#        run: make build-hysteria push-hysteria
+#        env:
+#          USR: ${{ secrets.USR }}
+#          BUILDER_DIR: $GITHUB_WORKSPACE
+#          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
 
 #      - name: build push dnscrypt
 #        run: make build-dnscrypt push-dnscrypt
@@ -78,6 +78,8 @@ jobs:
           docker run -i --rm --user $(id -u):$(id -g) -v $GITHUB_WORKSPACE/output:/opt v2fly-win cp /app/v2ray.exe /opt/net.exe
           zip -9 $GITHUB_WORKSPACE/output/net.zip $GITHUB_WORKSPACE/output/net.exe
           chmod -R 777 $GITHUB_WORKSPACE/output
+          ls -al
+          ls -al $GITHUB_WORKSPACE/output
 
         env:
           USR: ${{ secrets.USR }}
@@ -90,7 +92,7 @@ jobs:
           retention-days: 3
           name: net-win
           path: |
-            $GITHUB_WORKSPACE/output/net.zip
+            ./output/net.zip
 
       - name: Release
         uses: softprops/action-gh-release@v2
@@ -100,4 +102,5 @@ jobs:
           make_latest: false
           tag_name: "wip-${{ github.run_number }}"
           name: "wip-${{ github.run_number }}"
-          files: $GITHUB_WORKSPACE/output/*
+          files: |
+            ./output/net.zip
