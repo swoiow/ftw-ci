@@ -75,10 +75,9 @@ jobs:
         run: |
           make build-v2fly-win
           mkdir -p $GITHUB_WORKSPACE/output
-          docker run -i --rm -v $GITHUB_WORKSPACE/output:/opt v2fly-win cp /app/v2ray.exe /opt/net.exe
+          docker run -i --rm --user $(id -u):$(id -g) -v $GITHUB_WORKSPACE/output:/opt v2fly-win cp /app/v2ray.exe /opt/net.exe
           zip -9 $GITHUB_WORKSPACE/output/net.zip $GITHUB_WORKSPACE/output/net.exe
-          echo $PWD
-          ls -al
+          chmod -R 777 $GITHUB_WORKSPACE/output
 
         env:
           USR: ${{ secrets.USR }}
@@ -91,7 +90,7 @@ jobs:
           retention-days: 3
           name: net-win
           path: |
-            $GITHUB_WORKSPACE/output
+            $GITHUB_WORKSPACE/output/net.zip
 
       - name: Release
         uses: softprops/action-gh-release@v2
@@ -99,6 +98,6 @@ jobs:
           prerelease: true
           draft: true
           make_latest: false
-          tag_name: "wip"
-          name: "wip"
-          files: $GITHUB_WORKSPACE/output/net.zip
+          tag_name: "wip-${{ github.run_number }}"
+          name: "wip-${{ github.run_number }}"
+          files: $GITHUB_WORKSPACE/output/*
