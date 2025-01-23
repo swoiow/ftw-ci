@@ -92,3 +92,13 @@ jobs:
           name: net-win
           path: |
             $GITHUB_WORKSPACE/output
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          prerelease: true
+          draft: true
+          make_latest: false
+          tag_name: "wip"
+          name: "wip"
+          files: $GITHUB_WORKSPACE/output/net.zip
