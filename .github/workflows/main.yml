@@ -76,10 +76,10 @@ jobs:
           make build-v2fly-win
           mkdir -p $GITHUB_WORKSPACE/output
           docker run -i --rm --user $(id -u):$(id -g) -v $GITHUB_WORKSPACE/output:/opt v2fly-win cp /app/v2ray.exe /opt/net.exe
-          zip -9 $GITHUB_WORKSPACE/output/net.zip $GITHUB_WORKSPACE/output/net.exe
+          zip -9 -j $GITHUB_WORKSPACE/output/net.zip $GITHUB_WORKSPACE/output/net.exe
           chmod -R 777 $GITHUB_WORKSPACE/output
-          ls -al
-          ls -al $GITHUB_WORKSPACE/output
+#          ls -al
+#          ls -al $GITHUB_WORKSPACE/output
 
         env:
           USR: ${{ secrets.USR }}
@@ -97,10 +97,11 @@ jobs:
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
+          token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
           prerelease: true
-          draft: true
+          draft: false
           make_latest: false
-          tag_name: "wip-${{ github.run_number }}"
-          name: "wip-${{ github.run_number }}"
+          tag_name: "win-${{ github.run_number }}"
+          name: "win-${{ github.run_number }}"
           files: |
             ./output/net.zip
