@@ -4,7 +4,7 @@ FROM alpine as upx
 WORKDIR /app
 
 # Set build argument for UPX version
-ARG UPX_VERSION=4.2.4
+ARG UPX_VERSION=5.0.0
 
 # Use build-time argument for UPX version
 ADD https://github.com/upx/upx/releases/download/v${UPX_VERSION}/upx-${UPX_VERSION}-amd64_linux.tar.xz /app/
