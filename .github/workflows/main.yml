@@ -45,12 +45,17 @@ jobs:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       
       - name: build push net
-        run: make build-net push-net
         env:
           USR: ${{ secrets.USR }}
           BUILDER_DIR: $GITHUB_WORKSPACE
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-
+        run: |
+          make build-net push-net
+          mkdir -p $GITHUB_WORKSPACE/output
+          docker run -i --rm --user $(id -u):$(id -g) -v $GITHUB_WORKSPACE/output:/opt ${DOCKER_USERNAME}/net cp /usr/bin/net /opt/net
+          zip -9 -j $GITHUB_WORKSPACE/output/net-linux.zip $GITHUB_WORKSPACE/output/net
+          chmod -R 777 $GITHUB_WORKSPACE/output
+          
       - name: build push hysteria
         run: make build-hysteria push-hysteria
         env:
@@ -91,6 +96,7 @@ jobs:
           name: net-win
           path: |
             ./output/net.zip
+            ./output/net-linux.zip
 
       - name: Release
         uses: softprops/action-gh-release@v2
@@ -99,7 +105,8 @@ jobs:
           prerelease: true
           draft: false
           make_latest: false
-          tag_name: "win-${{ github.run_number }}"
-          name: "win-${{ github.run_number }}"
+          tag_name: "binary-${{ github.run_number }}"
+          name: "binary-${{ github.run_number }}"
           files: |
             ./output/net.zip
+            ./output/net-linux.zip
