@@ -48,7 +48,12 @@ jobs:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
 
       - name: Build hysteria
-        run: make build-hysteria push-hysteria
+        run: |
+          make build-hysteria push-hysteria
+          mkdir -p output
+          docker run -i --rm --user $(id -u):$(id -g) -v $PWD/output:/opt ${DOCKER_USERNAME}/hysteria cp /usr/bin/hysteria /opt/hysteria
+          zip -9 -j output/hysteria-linux.zip output/hysteria
+          chmod -R 777 output
         env:
           USR: ${{ secrets.USR }}
           BUILDER_DIR: $GITHUB_WORKSPACE
@@ -85,8 +90,9 @@ jobs:
           retention-days: 1
           path: |
             output/net.zip
-            output/net-linux.zip
+            output/net-amd64.zip
             output/hysteria.zip
+            output/hysteria-amd64.zip
 
   release:
     needs:
@@ -103,15 +109,17 @@ jobs:
 
       - name: Generate release info
         run: |
+          export RELEASE_TIME="$(TZ=Asia/Shanghai date '+%Y-%m-%d %H:%M:%S CST')"
           mkdir -p release-info
-          echo "Build Time: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" > release-info/release-info.txt
+          echo "Build Time: $RELEASE_TIME" > release-info/release-info.txt
           echo "" >> release-info/release-info.txt
           echo "Files & MD5:" >> release-info/release-info.txt
           find output -type f | while read file; do
             hash=$(md5sum "$file" | awk '{print $1}')
-            echo "$file => $hash" >> release-info/release-info.txt
+            echo "$(basename "$file") => $hash" >> release-info/release-info.txt
           done
-          cat release-info/release-info.txt
+          cp release-info/release-info.txt release-body.md
+          cat release-body.md
 
       - name: Release artifacts
         uses: softprops/action-gh-release@v2
@@ -122,8 +130,9 @@ jobs:
           make_latest: false
           tag_name: "binary-${{ github.run_number }}"
           name: "binary-${{ github.run_number }}"
-          body_path: release-body.md
+          body_path: release-info/release-info.txt
           files: |
             output/**/net.zip
             output/**/net-linux.zip
             output/**/hysteria.zip
+            output/**/hysteria-linux.zip
