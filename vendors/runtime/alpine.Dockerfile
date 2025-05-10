@@ -1,14 +1,16 @@
 FROM alpine
 
-ADD https://github.com/krallin/tini/releases/download/v0.19.0/tini-amd64 /usr/bin/tini
-RUN chmod +x /usr/bin/tini
+ADD https://github.com/krallin/tini/releases/download/v0.19.0/tini-static /usr/local/bin/tini
+RUN chmod +x /usr/local/bin/tini
 
 ENV TZ=Asia/Shanghai
 
 RUN apk update && \
     apk upgrade && \
-    apk add ca-certificates wget curl && update-ca-certificates && \
+    apk add --no-cache ca-certificates wget curl && update-ca-certificates tini && \
     apk add --update tzdata && \
-    rm -rf /var/cache/apk/*
+    rm -rf /root/.cache /tmp/* /var/lib/apt/* /var/cache/* /var/log/*
 
-ENTRYPOINT ["tini", "--"]
+ENTRYPOINT ["/usr/local/bin/tini", "--"]
+
+CMD ["/bin/bash"]

@@ -1,7 +1,7 @@
 FROM debian:stable-slim
 
-ADD https://github.com/krallin/tini/releases/download/v0.19.0/tini-amd64 /usr/bin/tini
-RUN chmod +x /usr/bin/tini
+ADD https://github.com/krallin/tini/releases/download/v0.19.0/tini-amd64 /usr/local/bin/tini
+RUN chmod +x /usr/local/bin/tini
 
 ENV TZ=Asia/Shanghai
 
@@ -13,4 +13,6 @@ RUN apt-get -qq update && \
     rm -rf /root/.cache /tmp/* /var/lib/apt/* /var/cache/* /var/log/* && \
     rm -rf /var/lib/apt /var/lib/dpkg /var/lib/cache /var/lib/log
 
-ENTRYPOINT ["tini", "--"]
+ENTRYPOINT ["/usr/local/bin/tini", "--"]
+
+CMD ["/bin/bash"]
