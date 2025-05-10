@@ -76,3 +76,8 @@ build-hysteria:
 push-hysteria:
 	docker tag hysteria ${DOCKER_USERNAME}/hysteria
 	docker push ${DOCKER_USERNAME}/hysteria
+
+build-hysteria-win:
+	docker build -t hysteria-win \
+	-f ${BUILDER_DIR}/vendors/hysteria/win.Dockerfile \
+	--no-cache --compress .
