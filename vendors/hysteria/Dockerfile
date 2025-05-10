@@ -38,15 +38,19 @@ RUN set -x && \
 FROM runtime-alpine
 LABEL App=Hysteria
 
-ENV ASSETS_PATH=/etc/net \
-    UPDATE_ASSETS=1
-
-ARG GEOIP_URL=https://github.com/Loyalsoldier/geoip/raw/release/geoip.dat
-ARG GEOLITE2_URL=https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-Country.mmdb
+ENV ASSETS_PATH=/etc/hysteria \
+    UPDATE_ASSETS=1 \
+    GEOIP_URL=https://github.com/Loyalsoldier/geoip/raw/release/geoip.dat \
+    GEOLITE2_URL=https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-Country.mmdb
 
 WORKDIR /app
 
 COPY --from=upx /dist/hysteria /usr/bin/hysteria
 
-# Entry point with option to control asset update
-CMD ["sh", "-c", "if [ \"$UPDATE_ASSETS\" = \"1\" ]; then curl -o ${ASSETS_PATH}/geoip.dat ${GEOIP_URL}; curl -o ${ASSETS_PATH}/GeoLite2-Country.mmdb ${GEOLITE2_URL}; fi && hysteria"]
+ADD ./vendors/hysteria/docker-entrypoint.sh /etc/hysteria/docker-entrypoint.sh
+RUN chmod +x /etc/hysteria/docker-entrypoint.sh
+
+ADD ./vendors/hysteria/docker-entrypoint.sh /etc/hysteria/docker-entrypoint.sh
+RUN chmod +x /etc/hysteria/docker-entrypoint.sh
+
+CMD ["/etc/hysteria/docker-entrypoint.sh"]
