@@ -122,7 +122,7 @@ jobs:
           make_latest: false
           tag_name: "binary-${{ github.run_number }}"
           name: "binary-${{ github.run_number }}"
-          body_path: release-body.md
+          body_path: release-info/release-info.txt
           files: |
             output/**/net.zip
             output/**/net-linux.zip
