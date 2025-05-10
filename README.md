@@ -1,5 +1,6 @@
-# Docker Images 
-[![Build](https://github.com/swoiow/ftw-ci/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/swoiow/ftw-ci/actions/workflows/main.yml)
+# Docker Images
+
+[![Build](https://github.com/swoiow/ftw-ci/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/swoiow/ftw-ci/actions/workflows/ci.yml)
 
 Cron Jobs to build images by GitHub Action.
 
@@ -10,11 +11,14 @@ Cron Jobs to build images by GitHub Action.
 + dnscrypt-proxy stable version
 
 # Crontab
+
 ```
 #0 1 * * * /usr/bin/sh /root/cronTasks/restart.sh
 #0 1 * * * /usr/local/bin/vps_updater updater
 ```
+
 + ### restart.sh
+
 ```
 #!/usr/bin/env bash
 
