@@ -1,7 +1,7 @@
-FROM v2fly-dist as dist
+FROM v2fly-dist AS dist
 
 # ---------- UPX
-FROM alpine as upx
+FROM alpine AS upx
 WORKDIR /app
 
 # Set build argument for UPX version
