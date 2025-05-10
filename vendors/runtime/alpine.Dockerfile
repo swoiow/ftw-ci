@@ -1,10 +1,14 @@
 FROM alpine
 
-ADD https://github.com/Yelp/dumb-init/releases/download/v1.2.5/dumb-init_1.2.5_x86_64 /usr/bin/dumb-init
-RUN chmod +x /usr/bin/dumb-init
+ADD https://github.com/krallin/tini/releases/download/v0.19.0/tini-amd64 /usr/bin/tini
+RUN chmod +x /usr/bin/tini
+
+ENV TZ=Asia/Shanghai
 
 RUN apk update && \
     apk upgrade && \
     apk add ca-certificates wget curl && update-ca-certificates && \
     apk add --update tzdata && \
     rm -rf /var/cache/apk/*
+
+ENTRYPOINT ["tini", "--"]

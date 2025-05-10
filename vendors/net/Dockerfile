@@ -1,5 +1,6 @@
 FROM v2fly-dist as dist
 
+# ---------- UPX
 FROM alpine as upx
 WORKDIR /app
 
@@ -15,12 +16,11 @@ RUN set -x && \
     tar --strip-components=1 -xf upx-${UPX_VERSION}-amd64_linux.tar.xz && \
     ./upx --lzma -9 -f -o /dist/net /app/net
 
-# Make package
+# ---------- Make Package
 FROM runtime-alpine
 LABEL App=Net-tools
 
-ENV TZ=Asia/Shanghai \
-    V2RAY_LOCATION_CONFIG=/etc/net \
+ENV V2RAY_LOCATION_CONFIG=/etc/net \
     V2RAY_LOCATION_ASSET=/usr/data \
     UPDATE_ASSETS=1
 
@@ -37,9 +37,6 @@ ADD ${GEOIP_URL} ${V2RAY_LOCATION_ASSET}/geoip.dat
 ADD ${GEOSITE_URL} ${V2RAY_LOCATION_ASSET}/geosite.dat
 
 RUN chmod 766 ${V2RAY_LOCATION_ASSET}/geoip.dat ${V2RAY_LOCATION_ASSET}/geosite.dat
-
-# Entry point with option to control asset update
-ENTRYPOINT ["dumb-init", "--"]
 
 # Default command, checking if update is required for geoip.dat and geosite.dat
 CMD ["sh", "-c", "if [ \"$UPDATE_ASSETS\" = \"1\" ]; then curl -o ${V2RAY_LOCATION_ASSET}/geoip.dat ${GEOIP_URL}; curl -o ${V2RAY_LOCATION_ASSET}/geosite.dat ${GEOSITE_URL}; fi && net -config=/etc/net/config.json"]

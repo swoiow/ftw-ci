@@ -18,16 +18,31 @@ RUN stableTag=$(gr $REPO) && \
     echo stableTag && \
     go build -o ./hysteria -ldflags "$LDFLAGS" ./app && chmod +x ./hysteria
 
-# Make package
+# ---------- UPX
+FROM alpine as upx
+WORKDIR /app
+
+# Set build argument for UPX version
+ARG UPX_VERSION=5.0.0
+
+# Use build-time argument for UPX version
+ADD https://github.com/upx/upx/releases/download/v${UPX_VERSION}/upx-${UPX_VERSION}-amd64_linux.tar.xz /app/
+
+COPY --from=dist /app/hysteria /app/hysteria
+RUN set -x && \
+    mkdir -p /dist && \
+    tar --strip-components=1 -xf upx-${UPX_VERSION}-amd64_linux.tar.xz && \
+    ./upx --lzma -9 -f -o /dist/hysteria /app/hysteria
+
+# ---------- Make Package
 FROM runtime-alpine
 LABEL App=Hysteria
 
-ENV TZ=Asia/Shanghai \
-    UPDATE_ASSETS=1
+ENV UPDATE_ASSETS=1
 
 WORKDIR /app
 
-COPY --from=dist /app/hysteria /usr/bin/hysteria
+COPY --from=upx /dist/hysteria /usr/bin/hysteria
 
 # Entry point with option to control asset update
-ENTRYPOINT ["dumb-init", "--", "hysteria"]
+ENTRYPOINT ["tini", "--", "hysteria"]
