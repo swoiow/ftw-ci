@@ -1,104 +1,119 @@
-# This is a basic workflow to help you get started with Actions
-
 name: CI
 
-# Controls when the action will run.
-on:
-  # Triggers the workflow on push or pull request events but only for the master branch
-  push:
-    branches: [ main ]
+concurrency:
+  group: CI
+  cancel-in-progress: true
 
+
+on:
+  push:
+    branches: [main]
   schedule:
     - cron: "45 2 */3 * *"
-
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
   build:
-    # The type of runner that the job will run on
     runs-on: ubuntu-latest
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
-
-      - name: docker login
+      - uses: actions/checkout@v4
+      - name: Docker login
         run: make docker-login
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: build environments
+      - name: Prepare environments
         run: make prepare-environments
         env:
           BUILDER_DIR: $GITHUB_WORKSPACE
 
-      - name: build v2fly
+      - name: Build v2fly
         run: make build-v2fly
         env:
           USR: ${{ secrets.USR }}
           BUILDER_DIR: $GITHUB_WORKSPACE
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      
-      - name: build push net
+
+      - name: Build net
+        run: |
+          make build-net push-net
+          mkdir -p output
+          docker run -i --rm --user $(id -u):$(id -g) -v $PWD/output:/opt ${DOCKER_USERNAME}/net cp /usr/bin/net /opt/net
+          zip -9 -j output/net-linux.zip output/net
+          chmod -R 777 output
         env:
           USR: ${{ secrets.USR }}
           BUILDER_DIR: $GITHUB_WORKSPACE
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-        run: |
-          make build-net push-net
-          mkdir -p $GITHUB_WORKSPACE/output
-          docker run -i --rm --user $(id -u):$(id -g) -v $GITHUB_WORKSPACE/output:/opt ${DOCKER_USERNAME}/net cp /usr/bin/net /opt/net
-          zip -9 -j $GITHUB_WORKSPACE/output/net-linux.zip $GITHUB_WORKSPACE/output/net
-          chmod -R 777 $GITHUB_WORKSPACE/output
-          
-      - name: build push hysteria
+
+      - name: Build hysteria
         run: make build-hysteria push-hysteria
         env:
           USR: ${{ secrets.USR }}
           BUILDER_DIR: $GITHUB_WORKSPACE
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
 
-#      - name: build push dnscrypt
-#        run: make build-dnscrypt push-dnscrypt
-#        env:
-#          USR: ${{ secrets.USR }}
-#          BUILDER_DIR: $GITHUB_WORKSPACE
-#          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-
-      - name: list images
-        run: docker images
-
-      - name: docker logout
-        run: docker logout
-
-      - name: build v2fly win
+      - name: Build v2fly win
         run: |
           make build-v2fly-win
-          mkdir -p $GITHUB_WORKSPACE/output
-          docker run -i --rm --user $(id -u):$(id -g) -v $GITHUB_WORKSPACE/output:/opt v2fly-win cp /app/v2ray.exe /opt/net.exe
-          zip -9 -j $GITHUB_WORKSPACE/output/net.zip $GITHUB_WORKSPACE/output/net.exe
-          chmod -R 777 $GITHUB_WORKSPACE/output
-
+          mkdir -p output
+          docker run -i --rm --user $(id -u):$(id -g) -v $PWD/output:/opt v2fly-win cp /app/v2ray.exe /opt/net.exe
+          zip -9 -j output/net.zip output/net.exe
+          chmod -R 777 output
         env:
           USR: ${{ secrets.USR }}
           BUILDER_DIR: $GITHUB_WORKSPACE
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
 
-      - name: release binary
+      - name: Build hysteria win
+        run: |
+          make build-hysteria-win
+          mkdir -p output
+          docker run -i --rm --user $(id -u):$(id -g) -v $PWD/output:/opt hysteria-win cp /app/hysteria.exe /opt/hysteria.exe
+          zip -9 -j output/hysteria.zip output/hysteria.exe
+          chmod -R 777 output
+        env:
+          USR: ${{ secrets.USR }}
+          BUILDER_DIR: $GITHUB_WORKSPACE
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          retention-days: 3
-          name: binary
+          name: release-artifacts
+          retention-days: 1
           path: |
-            ./output/net.zip
-            ./output/net-linux.zip
+            output/net.zip
+            output/net-linux.zip
+            output/hysteria.zip
 
-      - name: Release
+  release:
+    needs:
+      - build
+
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: output
+
+      - name: Show contents
+        run: ls -R output
+
+      - name: Generate release info
+        run: |
+          mkdir -p release-info
+          echo "Build Time: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" > release-info/release-info.txt
+          echo "" >> release-info/release-info.txt
+          echo "Files & MD5:" >> release-info/release-info.txt
+          find output -type f | while read file; do
+            hash=$(md5sum "$file" | awk '{print $1}')
+            echo "$file => $hash" >> release-info/release-info.txt
+          done
+          cat release-info/release-info.txt
+
+      - name: Release artifacts
         uses: softprops/action-gh-release@v2
         with:
           token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
@@ -107,6 +122,8 @@ jobs:
           make_latest: false
           tag_name: "binary-${{ github.run_number }}"
           name: "binary-${{ github.run_number }}"
+          body_path: release-body.md
           files: |
-            ./output/net.zip
-            ./output/net-linux.zip
+            output/**/net.zip
+            output/**/net-linux.zip
+            output/**/hysteria.zip
