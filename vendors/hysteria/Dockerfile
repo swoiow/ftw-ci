@@ -1,4 +1,4 @@
-FROM golang-env:0.1 as dist
+FROM golang-env:0.1 AS dist
 
 ENV CGO_ENABLED=0 \
     GOOS=linux \
@@ -19,7 +19,7 @@ RUN stableTag=$(gr $REPO) && \
     go build -o ./hysteria -ldflags "$LDFLAGS" ./app && chmod +x ./hysteria
 
 # ---------- UPX
-FROM alpine as upx
+FROM alpine AS upx
 WORKDIR /app
 
 # Set build argument for UPX version
