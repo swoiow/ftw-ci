@@ -39,7 +39,7 @@ jobs:
         run: |
           make build-net push-net
           mkdir -p output
-          docker run -i --rm --user $(id -u):$(id -g) -v $PWD/output:/opt ${DOCKER_USERNAME}/net cp /usr/bin/net /opt/net
+          docker run -i --rm --user $(id -u):$(id -g) -v $PWD/output:/opt net cp /usr/bin/net /opt/net
           zip -9 -j output/net-linux.zip output/net
           chmod -R 777 output
         env:
@@ -51,7 +51,7 @@ jobs:
         run: |
           make build-hysteria push-hysteria
           mkdir -p output
-          docker run -i --rm --user $(id -u):$(id -g) -v $PWD/output:/opt ${DOCKER_USERNAME}/hysteria cp /usr/bin/hysteria /opt/hysteria
+          docker run -i --rm --user $(id -u):$(id -g) -v $PWD/output:/opt hysteria cp /usr/bin/hysteria /opt/hysteria
           zip -9 -j output/hysteria-linux.zip output/hysteria
           chmod -R 777 output
         env:
@@ -90,9 +90,9 @@ jobs:
           retention-days: 1
           path: |
             output/net.zip
-            output/net-amd64.zip
+            output/net-linux.zip
             output/hysteria.zip
-            output/hysteria-amd64.zip
+            output/hysteria-linux.zip
 
   release:
     needs:
