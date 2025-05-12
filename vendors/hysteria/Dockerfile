@@ -9,13 +9,14 @@ WORKDIR /app
 RUN git clone https://github.com/${REPO}.git /app && \
     git fetch --tags
 RUN stableTag=$(gr $REPO) && \
+    echo "Using tag: ${stableTag}" && \
+    git checkout ${stableTag} && \
     CODENAME="@$(date +%Y%m%d)" && \
     LDFLAGS="\
         -s -w \
         -X "github.com/apernet/hysteria/app/v2/cmd.appVersion=${stableTag}" \
         -X "github.com/apernet/hysteria/app/v2/cmd.appDate=${CODENAME}" \
     " && \
-    echo stableTag && \
     go build -o ./hysteria -ldflags "$LDFLAGS" ./app && chmod +x ./hysteria
 
 # ---------- UPX
