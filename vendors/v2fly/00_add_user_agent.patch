@@ -1,0 +1,18 @@
+Subject: [PATCH] add ua
+---
+Index: transport/internet/grpc/dial.go
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/transport/internet/grpc/dial.go b/transport/internet/grpc/dial.go
+--- a/transport/internet/grpc/dial.go	(revision 28f558601fb8b6ab1bf4cdbdd3b8848047393e77)
++++ b/transport/internet/grpc/dial.go	(revision 61f4819e3fa76555c25fdb25bf5af83ec6d5e4c4)
+@@ -116,6 +116,7 @@
+ 			detachedContext := core.ToBackgroundDetachedContext(ctx)
+ 			return internet.DialSystem(detachedContext, net.TCPDestination(address, port), streamSettings.SocketSettings)
+ 		}),
++		grpc.WithUserAgent("gRPC.xClient.2025"),
+ 	)
+ 	globalDialerMap[dest] = conn
+ 	return conn, canceller, err

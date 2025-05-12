@@ -47,9 +47,10 @@ push-net:
 	docker push ${DOCKER_USERNAME}/net
 
 build-v2fly:
+	cd ${BUILDER_DIR}/vendors/v2fly && \
 	docker build \
 		-t v2fly-dist \
-		-f ${BUILDER_DIR}/vendors/v2fly/Dockerfile \
+		-f Dockerfile \
 		--no-cache --compress .
 
 build-v2fly-win:
