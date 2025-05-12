@@ -3,18 +3,24 @@ FROM golang-env:0.1
 ENV CGO_ENABLED=0 \
     GOOS=linux \
     GOARCH=amd64 \
-    REPO=v2fly/v2ray-core
+    REPO=v2fly/v2ray-core \
+    GRPC_GO_VERSION="v1.72.0" \
+    GRPC_GO_CUSTOM_UA="gRPC.xCloud.2025"
 
 WORKDIR /app
 
-COPY 00_add_user_agent.patch /tmp/00_add_user_agent.patch
-
-RUN git clone https://github.com/v2fly/v2ray-core.git /app && \
+RUN git clone https://github.com/grpc/grpc-go.git /usr/src/grpc-go && \
+    cd /usr/src/grpc-go && \
+    git checkout ${GRPC_GO_VERSION} && \
+    sed -i "s|const grpcUA = \"grpc-go/\" + Version|const grpcUA = \"${GRPC_GO_CUSTOM_UA}\"|" /usr/src/grpc-go/rpc_util.go && \
+    git clone https://github.com/${REPO}.git /app && \
+    cd /app && \
     git fetch --tags && \
     stableTag=$(gr $REPO) && \
     echo "Using tag: ${stableTag}" && \
     git checkout ${stableTag} && \
-    git apply /tmp/00_add_user_agent.patch && \
+    cd /app && go mod edit -replace=google.golang.org/grpc=/usr/src/grpc-go && \
+    cd /app && \
     CODENAME="@$(date +%Y%m%d)" && \
     LDFLAGS="\
         -s -w \
