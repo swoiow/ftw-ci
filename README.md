@@ -1,14 +1,16 @@
 # Docker Images
 
-[![Build](https://github.com/swoiow/ftw-ci/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/swoiow/ftw-ci/actions/workflows/ci.yml)
+[![Build](https://github.com/swoiow/ftw-ci/actions/workflows/ci.yml/badge.svg)](https://github.com/swoiow/ftw-ci/actions/workflows/ci.yml)
 
 Cron Jobs to build images by GitHub Action.
 
++ Net (V2fly)
++ V2fly
++ Hysteria2
 + ~~shadowsocks (Python version)~~
 + ~~shadowsocks-libev (C version)~~
-+ V2ray (V2ray+Random+upx / ss+V2ray-plug)
-+ Net (V2ray / shadowsocks-libev+V2ray-plug / kcptun)
-+ dnscrypt-proxy stable version
++ ~~V2ray (V2ray+Random+upx / ss+V2ray-plug)~~
++ ~~dnscrypt-proxy stable version~~
 
 # Crontab
 
