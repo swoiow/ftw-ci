@@ -9,7 +9,7 @@ on:
   push:
     branches: [main]
   schedule:
-    - cron: "45 2 */3 * *"
+    - cron: "45 2 */7 * *"
   workflow_dispatch:
 
 jobs:
