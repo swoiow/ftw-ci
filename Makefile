@@ -82,3 +82,8 @@ build-hysteria-win:
 	docker build -t hysteria-win \
 	-f ${BUILDER_DIR}/vendors/hysteria/win.Dockerfile \
 	--no-cache --compress .
+
+build-boringtun:
+	docker build -t boringtun \
+	-f ${BUILDER_DIR}/vendors/boringtun/Dockerfile \
+	--no-cache --compress .

@@ -16,7 +16,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Docker login
         run: make docker-login
         env:
@@ -83,8 +83,20 @@ jobs:
           BUILDER_DIR: $GITHUB_WORKSPACE
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
 
+      - name: Build boringtun
+        run: |
+          make build-boringtun
+          mkdir -p ./artifacts
+          docker run --rm -v $(pwd)/artifacts:/out boringtun cp -r /app/. /out/
+          zip -9 -j artifacts/boringtun.zip /out/*
+          chmod -R 777 artifacts
+        env:
+          USR: ${{ secrets.USR }}
+          BUILDER_DIR: $GITHUB_WORKSPACE
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: release-artifacts
           retention-days: 1
@@ -93,6 +105,7 @@ jobs:
             output/net-linux.zip
             output/hysteria.zip
             output/hysteria-linux.zip
+            artifacts/boringtun.zip
 
   release:
     needs:
@@ -100,7 +113,7 @@ jobs:
 
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           path: output
 
@@ -136,3 +149,4 @@ jobs:
             output/**/net-linux.zip
             output/**/hysteria.zip
             output/**/hysteria-linux.zip
+            output/**/boringtun.zip
