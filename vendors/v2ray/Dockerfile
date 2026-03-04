@@ -19,12 +19,16 @@ RUN go build -o ./v2ray -ldflags "-s -w" -i ./main && chmod +x ./v2ray
 
 FROM alpine AS upx
 WORKDIR /app
-RUN apk add wget
+
+ARG UPX_VERSION=5.1.0
+ADD https://github.com/upx/upx/releases/download/v${UPX_VERSION}/upx-${UPX_VERSION}-amd64_linux.tar.xz /app/
+
 COPY --from=builder /app/v2ray /app/v2ray
 #COPY --from=builder /app/v2ctl /app/v2ctl
-RUN wget https://github.com/upx/upx/releases/download/v3.96/upx-3.96-amd64_linux.tar.xz
-RUN tar --strip-components=1 -xf upx-3.96-amd64_linux.tar.xz && \
-    ./upx --brute /app/v2ray
+RUN set -x && \
+    mkdir -p /dist && \
+    tar --strip-components=1 -xf upx-${UPX_VERSION}-amd64_linux.tar.xz && \
+    ./upx --brute -o /dist/v2ray /app/v2ray
 
 # Make package
 FROM runtime-alpine
@@ -33,7 +37,7 @@ LABEL App=Net-tool-V
 ENV TZ=Asia/Shanghai
 
 ADD https://github.com/v2ray/ext/raw/master/docker/official/config.json /etc/net/config.json
-COPY --from=upx /app/v2ray /usr/bin/net
+COPY --from=upx /dist/v2ray /usr/bin/net
 #COPY --from=upx /app/v2ctl /usr/bin/v2ctl
 ADD update_geo.sh /usr/bin/update_geo.sh
 
