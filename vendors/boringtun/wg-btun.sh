@@ -26,10 +26,8 @@ log() {
     local level="$1"
     local msg="$2"
     local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
-    local formatted_msg="[$timestamp] [$level] $msg"
-
-    echo "$formatted_msg"
-    echo "$formatted_msg" >> "$LOG_FILE"
+    # 只输出到标准输出，让 Systemd 去捕获并写入文件
+    echo "[$timestamp] [$level] $msg"
 }
 
 # --- Feature: Environmental Audit ---
