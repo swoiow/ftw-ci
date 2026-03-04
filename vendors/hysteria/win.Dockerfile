@@ -1,4 +1,4 @@
-FROM golang-env:0.1 as dist
+FROM golang-env:0.1 AS dist
 
 ENV CGO_ENABLED=0 \
     GOOS=windows \

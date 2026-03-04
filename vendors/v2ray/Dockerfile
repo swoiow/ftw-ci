@@ -1,4 +1,4 @@
-FROM golang:alpine as builder
+FROM golang:alpine AS builder
 
 ENV CGO_ENABLED=0 \
     GOOS=linux \
@@ -17,7 +17,7 @@ RUN go build -o ./v2ray -ldflags "-s -w" -i ./main && chmod +x ./v2ray
 # RUN go build -o ./v2ctl -ldflags "-s -w" -i ./infra/control/main && chmod +x ./v2ctl
 
 
-FROM alpine as upx
+FROM alpine AS upx
 WORKDIR /app
 RUN apk add wget
 COPY --from=builder /app/v2ray /app/v2ray
