@@ -77,11 +77,13 @@ jobs:
         uses: actions/download-artifact@v5
         with:
           path: all-artifacts
-          pattern: artifact-*
+          name: release-artifacts
           merge-multiple: true
 
       - name: Generate release info
         run: |
+          # 建议加上这一行，增强健壮性
+          mkdir -p all-artifacts
           echo "### Build Info" > release-body.md
           echo "- **Time**: $(TZ=Asia/Shanghai date '+%Y-%m-%d %H:%M:%S CST')" >> release-body.md
           echo "- **Files & MD5**:" >> release-body.md
