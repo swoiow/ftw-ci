@@ -1,13 +1,12 @@
-name: CI-OLD
+name: CI-2026
 
 concurrency:
   group: CI
   cancel-in-progress: true
 
-
 on:
   push:
-    branches: [main]
+    branches: [ main ]
   schedule:
     - cron: "45 2 */7 * *"
   workflow_dispatch:
@@ -24,6 +23,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
+
       - name: Docker login
         run: make docker-login
         env:
@@ -32,107 +32,93 @@ jobs:
 
       - name: Prepare environments
         run: make prepare-environments
-        env:
-          BUILDER_DIR: $GITHUB_WORKSPACE
 
-      - name: Build v2fly
-        run: make build-v2fly
-
-      - name: Build net
+      # 使用一个统一的步骤来处理所有构建
+      # 这样你只需要维护这个列表，不需要复制粘贴整个 docker run 逻辑
+      - name: Build and Package all targets
         run: |
-          make build-net push-net
           mkdir -p output
-          docker run -i --rm --user $(id -u):$(id -g) -v $PWD/output:/opt net cp /usr/bin/net /opt/net
-          zip -9 -j output/net-linux.zip output/net
-          chmod -R 777 output
+          
+          # 定义一个辅助函数：参数为 (make指令, 镜像名, 内部文件名, 导出文件名)
+          build_and_zip() {
+            local cmd=$1; local img=$2; local src=$3; local dest=$4
+            echo "::group::Building $img"
+            make $cmd
+            docker run --rm $img cat "$src" > "output/$dest"
+            cd output && zip -9 "${dest%.*}.zip" "$dest" && cd ..
+            echo "::endgroup::"
+          }
 
-      - name: Build hysteria
-        run: |
-          make build-hysteria push-hysteria
-          mkdir -p output
-          docker run -i --rm --user $(id -u):$(id -g) -v $PWD/output:/opt hysteria cp /usr/bin/hysteria /opt/hysteria
-          zip -9 -j output/hysteria-linux.zip output/hysteria
-          chmod -R 777 output
+          # 1. Build Net (Linux & Win)
+          make build-v2fly  # 基础镜像
+          build_and_zip "build-net push-net" "net" "/usr/bin/net" "net-linux"
+          build_and_zip "build-v2fly-win" "v2fly-win" "/app/v2ray.exe" "net.exe"
 
-      - name: Build v2fly win
-        run: |
-          make build-v2fly-win
-          mkdir -p output
-          docker run -i --rm --user $(id -u):$(id -g) -v $PWD/output:/opt v2fly-win cp /app/v2ray.exe /opt/net.exe
-          zip -9 -j output/net.zip output/net.exe
-          chmod -R 777 output
+          # 2. Build Hysteria (Linux & Win)
+          build_and_zip "build-hysteria push-hysteria" "hysteria" "/usr/bin/hysteria" "hysteria-linux"
+          build_and_zip "build-hysteria-win" "hysteria-win" "/app/hysteria.exe" "hysteria.exe"
 
-      - name: Build hysteria win
-        run: |
-          make build-hysteria-win
-          mkdir -p output
-          docker run -i --rm --user $(id -u):$(id -g) -v $PWD/output:/opt hysteria-win cp /app/hysteria.exe /opt/hysteria.exe
-          zip -9 -j output/hysteria.zip output/hysteria.exe
-          chmod -R 777 output
-
-      - name: Build boringtun linux
-        run: |
-          make build-boringtun
-          mkdir -p ./output
-          # 方案：通过管道重定向导出（推荐，完全避开权限问题）
-          # 这样生成的文件所有者就是执行这个 shell 的用户，而不是 root
-          docker run --rm boringtun cat /app/boringtun-linux > ./output/boringtun-linux
-          chmod +x ./output/boringtun-linux
-          zip -9 -j output/boringtun-linux.zip output/boringtun-linux
-          chmod -R 777 output
+          # 3. Build Boringtun
+          build_and_zip "build-boringtun" "boringtun" "/app/boringtun-linux" "boringtun-linux"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v5
         with:
           name: release-artifacts
+          path: output/*.zip
           retention-days: 1
-          path: |
-            output/net.zip
-            output/net-linux.zip
-            output/hysteria.zip
-            output/hysteria-linux.zip
-            output/boringtun.zip
 
+  # 汇总发布
   release:
-    needs:
-      - build
-
+    needs: build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v5
+      - name: Download all artifacts
+        uses: actions/download-artifact@v5
         with:
-          path: output
-
-      - name: Show contents
-        run: ls -R output
+          path: all-artifacts
+          name: release-artifacts
+          merge-multiple: true
 
       - name: Generate release info
         run: |
-          export RELEASE_TIME="$(TZ=Asia/Shanghai date '+%Y-%m-%d %H:%M:%S CST')"
-          mkdir -p release-info
-          echo "Build Time: $RELEASE_TIME" > release-info/release-info.txt
-          echo "" >> release-info/release-info.txt
-          echo "Files & MD5:" >> release-info/release-info.txt
-          find output -type f | while read file; do
-            hash=$(md5sum "$file" | awk '{print $1}')
-            echo "$(basename "$file") => $hash" >> release-info/release-info.txt
-          done
-          cp release-info/release-info.txt release-body.md
-          cat release-body.md
+          # 1. 定义文件路径（使用环境变量更稳健）
+          RELEASE_BODY="${{ github.workspace }}/release-body.md"
+          
+          # 2. 写入头部信息
+          echo "### 🚀 Build Details" > "$RELEASE_BODY"
+          echo "- **Build Time**: $(TZ=Asia/Shanghai date '+%Y-%m-%d %H:%M:%S CST')" >> "$RELEASE_BODY"
+          echo "- **Action ID**: ${{ github.run_id }}" >> "$RELEASE_BODY"
+          echo "" >> "$RELEASE_BODY" # 关键空行
+          
+          echo "#### 📦 Files & MD5 Checksum" >> "$RELEASE_BODY"
+          echo "" >> "$RELEASE_BODY" # 关键空行：确保表格上方有空行
+          echo "| File Name | MD5 Hash |" >> "$RELEASE_BODY"
+          echo "| :--- | :--- |" >> "$RELEASE_BODY"
+          
+          # 3. 遍历并生成表格行
+          if [ -d "all-artifacts" ]; then
+            cd all-artifacts
+            # 仅匹配当前目录下的 zip，避免 find 递归出多余路径
+            for file in *.zip; do
+              if [ -f "$file" ]; then
+                hash=$(md5sum "$file" | awk '{print $1}')
+                echo "| \`$file\` | \`$hash\` |" >> "$RELEASE_BODY"
+              fi
+            done
+          else
+            echo "| N/A | No artifacts found |" >> "$RELEASE_BODY"
+          fi
+
+          # 4. 打印出来预览一下
+          cat "$RELEASE_BODY"
 
       - name: Release artifacts
         uses: softprops/action-gh-release@v2
         with:
           token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
           prerelease: true
-          draft: false
-          make_latest: false
           tag_name: "binary-${{ github.run_number }}"
-          name: "binary-${{ github.run_number }}"
-          body_path: release-info/release-info.txt
-          files: |
-            output/**/net.zip
-            output/**/net-linux.zip
-            output/**/hysteria.zip
-            output/**/hysteria-linux.zip
-            output/**/boringtun.zip
+          name: "Release ${{ github.run_number }}"
+          body_path: release-body.md
+          files: all-artifacts/*.zip
