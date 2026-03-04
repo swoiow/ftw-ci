@@ -74,7 +74,10 @@ jobs:
         run: |
           make build-boringtun
           mkdir -p ./output
-          docker run --rm -v $(pwd)/output:/out boringtun cp -r /app/. /out/
+          # 方案：通过管道重定向导出（推荐，完全避开权限问题）
+          # 这样生成的文件所有者就是执行这个 shell 的用户，而不是 root
+          docker run --rm boringtun cat /app/boringtun-linux > ./output/boringtun-linux
+          chmod +x ./output/boringtun-linux
           zip -9 -j output/boringtun-linux.zip output/boringtun-linux
           chmod -R 777 output
 
