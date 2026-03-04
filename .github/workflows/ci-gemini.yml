@@ -1,0 +1,98 @@
+name: CI
+
+concurrency:
+  group: CI
+  cancel-in-progress: true
+
+on:
+  push:
+    branches: [ main ]
+  schedule:
+    - cron: "45 2 */7 * *"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Docker login
+        run: make docker-login
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Prepare environments
+        run: make prepare-environments
+
+      # 使用一个统一的步骤来处理所有构建
+      # 这样你只需要维护这个列表，不需要复制粘贴整个 docker run 逻辑
+      - name: Build and Package all targets
+        run: |
+          mkdir -p output
+          
+          # 定义一个辅助函数：参数为 (make指令, 镜像名, 内部文件名, 导出文件名)
+          build_and_zip() {
+            local cmd=$1; local img=$2; local src=$3; local dest=$4
+            echo "::group::Building $img"
+            make $cmd
+            docker run --rm $img cat "$src" > "output/$dest"
+            cd output && zip -9 "${dest%.*}.zip" "$dest" && cd ..
+            echo "::endgroup::"
+          }
+
+          # 1. Build Net (Linux & Win)
+          make build-v2fly  # 基础镜像
+          build_and_zip "build-net push-net" "net" "/usr/bin/net" "net-linux"
+          build_and_zip "build-v2fly-win" "v2fly-win" "/app/v2ray.exe" "net.exe"
+
+          # 2. Build Hysteria (Linux & Win)
+          build_and_zip "build-hysteria push-hysteria" "hysteria" "/usr/bin/hysteria" "hysteria-linux"
+          build_and_zip "build-hysteria-win" "hysteria-win" "/app/hysteria.exe" "hysteria.exe"
+
+          # 3. Build Boringtun
+          build_and_zip "build-boringtun" "boringtun" "/app/boringtun-linux" "boringtun-linux"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v5
+        with:
+          name: release-artifacts
+          path: output/*.zip
+          retention-days: 1
+
+  # 汇总发布
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v5
+        with:
+          path: all-artifacts
+          pattern: artifact-*
+          merge-multiple: true
+
+      - name: Generate release info
+        run: |
+          echo "### Build Info" > release-body.md
+          echo "- **Time**: $(TZ=Asia/Shanghai date '+%Y-%m-%d %H:%M:%S CST')" >> release-body.md
+          echo "- **Files & MD5**:" >> release-body.md
+          echo "| File | MD5 |" >> release-body.md
+          echo "| --- | --- |" >> release-body.md
+          cd all-artifacts
+          find . -type f -name "*.zip" | while read file; do
+            hash=$(md5sum "$file" | awk '{print $1}')
+            echo "| $(basename "$file") | \`$hash\` |" >> ../release-body.md
+          done
+          cat ../release-body.md
+
+      - name: Release artifacts
+        uses: softprops/action-gh-release@v2
+        with:
+          token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
+          prerelease: true
+          tag_name: "binary-${{ github.run_number }}"
+          name: "Release ${{ github.run_number }}"
+          body_path: release-body.md
+          files: all-artifacts/*.zip
