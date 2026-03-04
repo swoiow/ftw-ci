@@ -1,4 +1,4 @@
-name: CI
+name: CI-2026
 
 concurrency:
   group: CI
@@ -14,6 +14,13 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      PYTHONIOENCODING: "utf-8"
+      PYTHONUTF8: "1"
+      USR: ${{ secrets.USR }}
+      BUILDER_DIR: $GITHUB_WORKSPACE
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+
     steps:
       - uses: actions/checkout@v6
 
