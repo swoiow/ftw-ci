@@ -51,7 +51,4 @@ COPY --from=upx /dist/hysteria /usr/bin/hysteria
 ADD ./vendors/hysteria/docker-entrypoint.sh /etc/hysteria/docker-entrypoint.sh
 RUN chmod +x /etc/hysteria/docker-entrypoint.sh
 
-ADD ./vendors/hysteria/docker-entrypoint.sh /etc/hysteria/docker-entrypoint.sh
-RUN chmod +x /etc/hysteria/docker-entrypoint.sh
-
 CMD ["/etc/hysteria/docker-entrypoint.sh"]

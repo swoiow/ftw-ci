@@ -5,7 +5,7 @@ ENV CGO_ENABLED=0 \
     GOARCH=amd64 \
     REPO=v2fly/v2ray-core \
     GRPC_GO_VERSION="v1.72.0" \
-    GRPC_GO_CUSTOM_UA="gRPC.xCloud.2025"
+    GRPC_GO_CUSTOM_UA="gRPC.xCloud.2026"
 
 WORKDIR /app
 

@@ -61,8 +61,12 @@ jobs:
           # 3. Build Boringtun
           build_and_zip "build-boringtun" "boringtun" "/app/boringtun-linux" "boringtun-linux"
 
+          # 4. Build Nebula (Linux & Win)
+          build_and_zip "build-nebula" "nebula" "/app/nebula" "nebula-linux"
+          build_and_zip "build-nebula-win" "nebula-win" "/app/nebula.exe" "nebula.exe"
+
       - name: Upload artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: release-artifacts
           path: output/*.zip
@@ -74,7 +78,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download all artifacts
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v8
         with:
           path: all-artifacts
           name: release-artifacts

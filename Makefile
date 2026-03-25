@@ -87,3 +87,13 @@ build-boringtun:
 	docker build -t boringtun \
 	-f ${BUILDER_DIR}/vendors/boringtun/Dockerfile \
 	--no-cache --compress .
+
+build-nebula:
+	docker build -t nebula \
+	-f ${BUILDER_DIR}/vendors/nebula/Dockerfile \
+	--no-cache --compress .
+
+build-nebula-win:
+	docker build -t nebula-win \
+	-f ${BUILDER_DIR}/vendors/nebula/win.Dockerfile \
+	--no-cache --compress .
