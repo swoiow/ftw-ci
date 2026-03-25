@@ -2,14 +2,14 @@
 # -*- coding: utf-8 -*-
 
 import datetime as dt
+import docker
+import requests
 import time
 from functools import partial
 from os import (environ, path)
 
-import docker
-import requests
-
 from images import IMAGES
+
 
 _package_dir = path.abspath(path.dirname(__file__))
 
