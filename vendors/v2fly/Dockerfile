@@ -3,8 +3,9 @@ FROM golang-env:0.1
 ENV CGO_ENABLED=0 \
     GOOS=linux \
     GOARCH=amd64 \
+	GOAMD64=v3 \
     REPO=v2fly/v2ray-core \
-    GRPC_GO_VERSION="v1.72.0" \
+    GRPC_GO_VERSION="v1.79.3" \
     GRPC_GO_CUSTOM_UA="gRPC.xCloud.2026"
 
 WORKDIR /app

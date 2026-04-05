@@ -3,6 +3,7 @@ FROM golang-env:0.1 AS dist
 ENV CGO_ENABLED=0 \
     GOOS=linux \
     GOARCH=amd64 \
+	GOAMD64=v3 \
     REPO=apernet/hysteria
 
 WORKDIR /app

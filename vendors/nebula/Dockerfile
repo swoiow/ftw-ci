@@ -4,6 +4,7 @@ FROM golang-env:0.1
 ENV CGO_ENABLED=0 \
     GOOS=linux \
     GOARCH=amd64 \
+	GOAMD64=v3 \
     REPO=slackhq/nebula \
     NEBULA_CMD_PATH="./cmd/nebula"
 
