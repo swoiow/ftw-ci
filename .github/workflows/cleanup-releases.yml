@@ -1,0 +1,49 @@
+name: Cleanup Old Releases and Tags
+
+concurrency:
+  group: Cleanup Old Releases and Tags
+  cancel-in-progress: true
+
+on:
+  workflow_dispatch: # 允许手动触发
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # 必须赋予写权限才能执行删除操作
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0 # 获取完整历史记录
+
+      - name: Delete old releases and tags
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Fetching list of all releases..."
+          
+          # 1. 获取所有 Release 的 Tag 名称，按创建时间降序排列
+          # jq 过滤掉排名前 20 的，保留剩下的
+          RELEASES_TO_DELETE=$(gh release list --limit 1000 | awk '{print $1}' | tail -n +21)
+
+          if [ -z "$RELEASES_TO_DELETE" ]; then
+            echo "No old releases to delete (Count is <= 20)."
+            exit 0
+          fi
+
+          for TAG in $RELEASES_TO_DELETE; do
+            echo "Processing $TAG..."
+          
+            # 2. 删除 GitHub 上的 Release 记录
+            echo "Deleting Release: $TAG"
+            gh release delete "$TAG" --yes || echo "Release $TAG already gone."
+
+            # 3. 删除远程仓库中的 Git Tag
+            echo "Deleting Tag: $TAG"
+            git push origin :refs/tags/"$TAG" || echo "Tag $TAG already deleted."
+          done
+
+          echo "Cleanup completed."
