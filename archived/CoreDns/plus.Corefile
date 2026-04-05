@@ -30,6 +30,7 @@
 #        log
 #        errors
 
+        auto-update-interval 24h
         blacklist file:///opt/dns/black.lst.conf
         blacklist file:///opt/dns/black-default.lst.conf
 #        blacklist https://t.cn/A6zY4e4i
@@ -40,7 +41,6 @@
 #        blacklist https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/win-spy.txt
 #        blacklist http://t.cn/A6MLgSPt
 #        blacklist https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/win-extra.txt
-#        auto-update-interval 24h
     }
 
     hosts {

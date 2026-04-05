@@ -5,9 +5,9 @@
 from __future__ import print_function
 
 import argparse
+import fnmatch
 import re
 import sys
-import fnmatch
 
 
 try:
@@ -186,7 +186,7 @@ def allowlist_from_url(url):
 
 
 def blocklists_from_config_file(
-        file, allowlist, time_restricted_url, ignore_retrieval_failure, output_file
+    file, allowlist, time_restricted_url, ignore_retrieval_failure, output_file
 ):
     blocklists = {}
     allowed_names = set()

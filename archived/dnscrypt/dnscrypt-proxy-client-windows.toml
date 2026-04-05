@@ -178,7 +178,7 @@ log_format = 'tsv'
 #        Pattern-based IP blocking (IP blocklists)        #
 ###########################################################
 [blocked_ips]
- blocked_ips_file = 'rules/blocked-ips.lst.txt'
+blocked_ips_file = 'rules/blocked-ips.lst.txt'
 # log_file = 'blocked-ips.log'
 # log_format = 'tsv'
 
