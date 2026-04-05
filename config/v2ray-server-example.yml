@@ -4,11 +4,11 @@
     "access": None,
     "error": None
   },
-  "inbounds": [{
+  "inbounds": [ {
     "port": 1080,
     "protocol": "vmess",
     "settings": {
-      "clients": []
+      "clients": [ ]
     },
     "streamSettings": {
       "network": "ws",
@@ -16,27 +16,27 @@
         "path": "/{UserDefine-path}/"
       }
     }
-  }],
-  "outbounds": [{
+  } ],
+  "outbounds": [ {
     "protocol": "freedom",
-    "settings": {}
+    "settings": { }
   },{
     "protocol": "blackhole",
-    "settings": {},
+    "settings": { },
     "tag": "blocked"
-  }],
+  } ],
   "routing": {
     "strategy": "rules",
     "domainStrategy": "IPOnDemand",
     "settings": {
       "rules": [
-      {
-        "type": "field",
-        "ip": [
-          "geoip:private"
-        ],
-        "outboundTag": "blocked"
-      }]
+        {
+          "type": "field",
+          "ip": [
+            "geoip:private"
+          ],
+          "outboundTag": "blocked"
+        } ]
     }
   },
 }
