@@ -1,0 +1,83 @@
+name: Cleanup Old Releases and Tags
+
+concurrency:
+  group: Cleanup Old Releases and Tags
+  cancel-in-progress: true
+
+on:
+  workflow_dispatch:
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Cleanup old releases and tags
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          echo "=== Cleanup releases named 'Release xxx' (keep latest 10) ==="
+
+          RELEASES_TO_DELETE="$(
+            gh release list \
+              --limit 1000 \
+              --exclude-drafts \
+              --json name,tagName,publishedAt,createdAt \
+              --jq '
+                map(
+                  select(
+                    .name != null
+                    and (.name | test("^Release\\s+.+$"))
+                  )
+                )
+                | sort_by(.publishedAt // .createdAt)
+                | reverse
+                | .[10:][]
+                | .tagName
+              '
+          )"
+
+          if [ -z "${RELEASES_TO_DELETE}" ]; then
+            echo "No matching old releases to delete."
+          else
+            while IFS= read -r TAG; do
+              [ -z "${TAG}" ] && continue
+              echo "Deleting release and its tag: ${TAG}"
+              gh release delete "${TAG}" --cleanup-tag --yes \
+                || echo "Skip ${TAG} (already deleted or not found)."
+            done <<< "${RELEASES_TO_DELETE}"
+          fi
+
+          echo "=== Cleanup tags matching 'binary-*' (keep latest 10) ==="
+
+          BINARY_TAGS_TO_DELETE="$(
+            git for-each-ref \
+              --sort=-creatordate \
+              --format='%(refname:strip=2)' \
+              refs/tags \
+            | awk '/^binary-/ { print }' \
+            | tail -n +11
+          )"
+
+          if [ -z "${BINARY_TAGS_TO_DELETE}" ]; then
+            echo "No matching old binary tags to delete."
+          else
+            while IFS= read -r TAG; do
+              [ -z "${TAG}" ] && continue
+              echo "Deleting binary tag: ${TAG}"
+              git push origin ":refs/tags/${TAG}" \
+                || echo "Skip ${TAG} (already deleted or not found)."
+            done <<< "${BINARY_TAGS_TO_DELETE}"
+          fi
+
+          echo "Cleanup completed."
