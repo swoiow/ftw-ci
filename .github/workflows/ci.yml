@@ -39,31 +39,36 @@ jobs:
         run: |
           mkdir -p output
           
-          # 定义一个辅助函数：参数为 (make指令, 镜像名, 内部文件名, 导出文件名)
+          # 定义一个辅助函数：参数为 (make指令, 镜像名, 内部文件名, 导出文件名, 压缩包名)
           build_and_zip() {
-            local cmd=$1; local img=$2; local src=$3; local dest=$4
+            local cmd=$1
+            local img=$2
+            local src=$3
+            local dest=$4
+            local zip_name=$5
+
             echo "::group::Building $img"
             make $cmd
-            docker run --rm $img cat "$src" > "output/$dest"
-            cd output && zip -9 "${dest%.*}.zip" "$dest" && cd ..
+            docker run --rm "$img" cat "$src" > "output/$dest"
+            cd output && zip -9 "$zip_name.zip" "$dest" && cd ..
             echo "::endgroup::"
           }
 
           # 1. Build Net (Linux & Win)
-          make build-v2fly  # 基础镜像
-          build_and_zip "build-net push-net" "net" "/usr/bin/net" "net-linux"
-          build_and_zip "build-v2fly-win" "v2fly-win" "/app/v2ray.exe" "net.exe"
+          make build-v2fly
+          build_and_zip "build-net push-net" "net" "/usr/bin/net" "net" "net-linux"
+          build_and_zip "build-v2fly-win" "v2fly-win" "/app/v2ray.exe" "net.exe" "net-win"
 
           # 2. Build Hysteria (Linux & Win)
-          build_and_zip "build-hysteria push-hysteria" "hysteria" "/usr/bin/hysteria" "hysteria-linux"
-          build_and_zip "build-hysteria-win" "hysteria-win" "/app/hysteria.exe" "hysteria.exe"
+          build_and_zip "build-hysteria push-hysteria" "hysteria" "/usr/bin/hysteria" "hysteria" "hysteria-linux"
+          build_and_zip "build-hysteria-win" "hysteria-win" "/app/hysteria.exe" "hysteria.exe" "hysteria-win"
 
           # 3. Build Boringtun
-          build_and_zip "build-boringtun" "boringtun" "/app/boringtun-linux" "boringtun-linux"
+          build_and_zip "build-boringtun" "boringtun" "/app/boringtun-linux" "boringtun" "boringtun-linux"
 
           # 4. Build Nebula (Linux & Win)
-          build_and_zip "build-nebula" "nebula" "/app/nebula" "nebula-linux"
-          build_and_zip "build-nebula-win" "nebula-win" "/app/nebula.exe" "nebula.exe"
+          build_and_zip "build-nebula" "nebula" "/app/nebula" "nebula" "nebula-linux"
+          build_and_zip "build-nebula-win" "nebula-win" "/app/nebula.exe" "nebula.exe" "nebula-win"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v7
@@ -118,7 +123,7 @@ jobs:
           cat "$RELEASE_BODY"
 
       - name: Release artifacts
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
           prerelease: true
