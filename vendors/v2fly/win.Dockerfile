@@ -20,4 +20,4 @@ RUN stableTag=$(gr $REPO) && \
         -X github.com/v2fly/v2ray-core/v5.intro="" \
     " && \
     echo stableTag && \
-    go build -o ./v2ray.exe -ldflags "$LDFLAGS" ./main
+    go build -trimpath -o ./v2ray.exe -ldflags "$LDFLAGS" ./main
