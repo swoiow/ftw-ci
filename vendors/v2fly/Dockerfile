@@ -30,4 +30,4 @@ RUN git clone https://github.com/grpc/grpc-go.git /usr/src/grpc-go && \
         -X github.com/v2fly/v2ray-core/v5.build="" \
         -X github.com/v2fly/v2ray-core/v5.intro="" \
     " && \
-    go build -o ./v2ray -ldflags "$LDFLAGS" ./main && chmod +x ./v2ray
+    go build -trimpath -o ./v2ray -ldflags "$LDFLAGS" ./main && chmod +x ./v2ray
